@@ -9,13 +9,13 @@ import tkinter.ttk as ttk
 import io
 import csv
 
-# Try importing PyMuPDF for PDF support
+# try importing pymupdf for pdf support
 try:
-    import fitz  # PyMuPDF
+    import fitz  # pymupdf
     PDF_AVAILABLE = True
 except ImportError:
     PDF_AVAILABLE = False
-    print("PyMuPDF (fitz) not found. PDF support disabled. Install with: pip install pymupdf")
+    print("pymupdf (fitz) not found. pdf support disabled. install with: pip install pymupdf")
 
 class RegionPropertiesDialog(tk.Toplevel):
     def __init__(self, parent, default_label="", default_subscale="General", default_value=""):
@@ -24,11 +24,11 @@ class RegionPropertiesDialog(tk.Toplevel):
         self.geometry("300x250")
         self.result = None
         
-        # Make modal
+        # make modal
         self.transient(parent)
         self.grab_set()
         
-        # Layout
+        # layout
         pad = 10
         
         tk.Label(self, text="Etiket (Örn: S1-A):").pack(anchor=tk.W, padx=pad, pady=(pad, 0))
@@ -40,7 +40,7 @@ class RegionPropertiesDialog(tk.Toplevel):
         self.ent_value = tk.Entry(self)
         self.ent_value.insert(0, default_value)
         self.ent_value.pack(fill=tk.X, padx=pad, pady=(0, pad))
-        self.ent_value.focus_set() # Focus on value as it's most common to change
+        self.ent_value.focus_set() # focus on value since it's most common
         
         tk.Label(self, text="Alt Ölçek (Örn: Depresyon):").pack(anchor=tk.W, padx=pad)
         self.ent_subscale = tk.Entry(self)
@@ -138,9 +138,9 @@ class AboutDialog(tk.Toplevel):
         super().__init__(parent)
         self.title("Hakkında")
         
-        # Window Configuration - Frameless minimal design
-        self.overrideredirect(True)  # Remove window decorations
-        self.configure(bg="#212121")  # Deep charcoal grey
+        # window config - frameless minimal design
+        self.overrideredirect(True)  # remove window decorations
+        self.configure(bg="#212121")  # deep charcoal grey
         
         # Fixed size
         window_width = 600
@@ -153,9 +153,9 @@ class AboutDialog(tk.Toplevel):
         y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
         
-        # Make modal and always on top
+        # make modal and always on top
         self.transient(parent)
-        self.attributes('-topmost', True)  # Always on top
+        self.attributes('-topmost', True)  # always on top
         
         # Force window to update and become visible
         self.update_idletasks()
@@ -167,10 +167,10 @@ class AboutDialog(tk.Toplevel):
         # Now grab focus
         self.grab_set()
         
-        # Track if we should close
+        # track if we should close
         self.should_close = False
         
-        # Click anywhere to close - but not immediately
+        # click anywhere to close - but not immediately
         def delayed_close(event):
             self.should_close = True
             self.destroy()
@@ -181,9 +181,9 @@ class AboutDialog(tk.Toplevel):
         container = tk.Frame(self, bg="#212121")
         container.pack(fill=tk.BOTH, expand=True, padx=60, pady=60)
         
-        # Font fallbacks for compatibility
+        # font fallbacks for compatibility
         try:
-            # Try to use preferred fonts, fallback to system defaults
+            # try preferred fonts, else system defaults
             header_font = ("Montserrat", 32, "bold")
             mono_font = ("Courier New", 9)
             label_font = ("Roboto", 10, "bold")
@@ -192,7 +192,7 @@ class AboutDialog(tk.Toplevel):
             quote_font = ("Georgia", 11, "italic")
             engine_font = ("Courier New", 8)
         except:
-            # Fallback to safe defaults
+        # fallback to safe defaults
             header_font = ("Arial", 32, "bold")
             mono_font = ("Courier", 9)
             label_font = ("Arial", 10, "bold")
@@ -201,7 +201,7 @@ class AboutDialog(tk.Toplevel):
             quote_font = ("Times New Roman", 11, "italic")
             engine_font = ("Courier", 8)
         
-        # === BLOCK A: Identity (The Header) ===
+        # === block a: identity (the header) ===
         header_frame = tk.Frame(container, bg="#212121")
         header_frame.pack(pady=(0, 20))
         
@@ -232,7 +232,7 @@ class AboutDialog(tk.Toplevel):
         line_frame.pack(fill=tk.X, padx=80)
         line_frame.bind("<Button-1>", delayed_close)
         
-        # === BLOCK B: Signature (The Creator) ===
+        # === block b: signature (the creator) ===
         creator_frame = tk.Frame(container, bg="#212121")
         creator_frame.pack(pady=(30, 0))
         
@@ -242,7 +242,7 @@ class AboutDialog(tk.Toplevel):
             text="GELİŞTİRİCİ",
             font=label_font,
             bg="#212121",
-            fg="#C5A572"  # Antique Gold
+            fg="#C5A572"  # antique gold
         )
         lbl_dev_label.pack()
         lbl_dev_label.bind("<Button-1>", delayed_close)
@@ -269,11 +269,11 @@ class AboutDialog(tk.Toplevel):
         lbl_dev_title.pack(pady=(5, 0))
         lbl_dev_title.bind("<Button-1>", delayed_close)
         
-        # === BLOCK C: Soul (The Philosophy) ===
+        # === block c: soul (the philosophy) ===
         philosophy_frame = tk.Frame(container, bg="#212121")
         philosophy_frame.pack(pady=(40, 0))
         
-        # Quote - Serif font for philosophical touch
+        # quote - serif font for philosophical touch
         lbl_quote = tk.Label(
             philosophy_frame,
             text='"to achieve great things, two things are needed:\na plan, and not quite enough time."',
@@ -286,31 +286,31 @@ class AboutDialog(tk.Toplevel):
         lbl_quote.pack()
         lbl_quote.bind("<Button-1>", delayed_close)
         
-        # === BLOCK D: Engine (The Footer) ===
+        # === block d: engine (the footer) ===
         footer_frame = tk.Frame(container, bg="#212121")
         footer_frame.pack(side=tk.BOTTOM, pady=(0, 0))
         
-        # Powered by text - barely visible
+        # powered by text - barely visible
         lbl_engine = tk.Label(
             footer_frame,
             text="Powered by Thoth Engine",
             font=engine_font,
             bg="#212121",
-            fg="#4A4A4A"  # Very dark grey, almost invisible
+            fg="#4A4A4A"  # very dark grey, almost invisible
         )
         lbl_engine.pack()
         lbl_engine.bind("<Button-1>", delayed_close)
         
-        # Bind container click as well
+        # bind container click as well
         container.bind("<Button-1>", delayed_close)
         
-        # Subtle border to define the window edge
+        # subtle border to define the window edge
         self.configure(highlightbackground="#4A4A4A", highlightthickness=1)
         
-        # ESC key to close
+        # esc key to close
         self.bind("<Escape>", lambda e: self.destroy())
         
-        # Wait for window to close (modal behavior)
+        # wait for window to close (modal behavior)
         self.wait_window(self)
 
 class OMRApp:
@@ -319,7 +319,7 @@ class OMRApp:
         self.root.title("GÖRÜNGÜ - Powered by Thoth Engine")
         self.root.geometry("1280x850")
         
-        # Initialize State Variables FIRST
+        # init state variables
         self.current_mode = None
         self.pages = [] 
         self.current_page_index = 0
@@ -336,13 +336,13 @@ class OMRApp:
         self.image_scale = 1.0
         self.txt_results = None 
         
-        # ROI Selection State
+        # roi selection state
         self.selected_roi_index = None
         
-        # Grid Mode State
+        # grid mode state
         self.grid_mode_var = tk.BooleanVar(value=False)
         
-        # Theme Configuration
+        # theme config
         self.themes = {
             "light": {
                 "bg": "#f4f6f9",        # Light gray background
@@ -381,22 +381,22 @@ class OMRApp:
         self.current_theme_name = "nile_delta"
         self.colors = self.themes[self.current_theme_name]
         
-        # Style Configuration
+        # style config
         self.style = ttk.Style()
         self.style.theme_use('clam') 
         self.apply_theme()
         
-        # Main container
+        # main container
         self.main_frame = ttk.Frame(self.root)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Status Bar
+        # status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Hazır")
         self.status_bar = ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W, font=("Segoe UI", 9))
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
-        # Menu
+        # menu
         self.menu_bar = tk.Menu(self.root)
         self.root.config(menu=self.menu_bar)
         
@@ -408,7 +408,7 @@ class OMRApp:
         self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="Görünüm", menu=self.view_menu)
         
-        # Theme Submenu
+        # theme submenu
         self.theme_menu = tk.Menu(self.view_menu, tearoff=0)
         self.view_menu.add_cascade(label="Tema", menu=self.theme_menu)
         
@@ -426,10 +426,10 @@ class OMRApp:
         self.menu_bar.add_cascade(label="Yardım", menu=self.help_menu)
         self.help_menu.add_command(label="Hakkında GÖRÜNGÜ", command=self.show_about)
         
-        # Initialize edit mode state
+        # init edit mode state
         self.edit_mode = False
         
-        # Start in Designer Mode by default
+        # start in designer mode
         self.setup_designer_mode()
 
     def clear_frame(self):
@@ -444,10 +444,10 @@ class OMRApp:
     def apply_theme(self):
         self.colors = self.themes[self.current_theme_name]
         
-        # Root
+        # root
         self.root.configure(bg=self.colors["bg"])
         
-        # TTK Styles
+        # ttk styles
         self.style.configure("TFrame", background=self.colors["bg"])
         self.style.configure("Panel.TFrame", background=self.colors["panel_bg"])
         self.style.configure("TLabel", background=self.colors["bg"], foreground=self.colors["text"])
@@ -463,7 +463,7 @@ class OMRApp:
         self.style.configure("TLabelframe", background=self.colors["panel_bg"], foreground=self.colors["text"])
         self.style.configure("TLabelframe.Label", background=self.colors["panel_bg"], foreground=self.colors["text"])
         
-        # Update specific non-ttk widgets if they exist
+        # update specific widgets
         if self.canvas:
             self.canvas.configure(bg=self.colors["canvas"])
             
@@ -472,7 +472,7 @@ class OMRApp:
             
         # Force refresh of main frame to apply TFrame style
         if hasattr(self, 'main_frame'):
-             # This trick sometimes helps force redraw
+             # force redraw
              self.main_frame.configure(style="TFrame")
     
     def show_about(self):
@@ -482,7 +482,7 @@ class OMRApp:
         print("[ABOUT] Hakkında penceresi kapatıldı")
 
     # ==========================================
-    # SHARED UTILS
+    # shared utils
     # ==========================================
     def load_images_from_file(self, file_path):
         """Returns a list of cv2 images from a file path (Image or PDF)"""
@@ -502,7 +502,7 @@ class OMRApp:
                 print(f"[LOAD] PDF sayfa sayısı: {len(doc)}")
                 for i, page in enumerate(doc):
                     print(f"[LOAD] PDF sayfa {i+1} işleniyor...")
-                    pix = page.get_pixmap(dpi=150) # 150 DPI is usually good enough
+                    pix = page.get_pixmap(dpi=150) # 150 dpi is good enough
                     img_data = pix.tobytes("png")
                     nparr = np.frombuffer(img_data, np.uint8)
                     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -534,11 +534,11 @@ class OMRApp:
         self.root.title("GÖRÜNGÜ - Tasarımcı Modu")
         self.status_var.set("Tasarımcı Modu: Başlamak için boş bir form yükleyin.")
 
-        # Toolbar
+        # toolbar
         toolbar = ttk.Frame(self.main_frame, style="Panel.TFrame", padding=10)
         toolbar.pack(side=tk.TOP, fill=tk.X, pady=(0, 10))
         
-        # Group 1: File Operations
+        # group 1: file operations
         grp_file = ttk.LabelFrame(toolbar, text="Dosya", padding=5)
         grp_file.pack(side=tk.LEFT, padx=5)
         
@@ -546,16 +546,16 @@ class OMRApp:
         ttk.Button(grp_file, text="Şablon Yükle", command=self.load_template_for_editing).pack(side=tk.LEFT, padx=5)
         ttk.Button(grp_file, text="Şablonu Kaydet", command=self.save_template, style="Accent.TButton").pack(side=tk.LEFT, padx=5)
         
-        # Group 2: Edit
+        # group 2: edit
         grp_edit = ttk.LabelFrame(toolbar, text="Düzenle", padding=5)
         grp_edit.pack(side=tk.LEFT, padx=5)
         ttk.Button(grp_edit, text="Sayfayı Temizle", command=self.clear_rois).pack(side=tk.LEFT, padx=5)
         
-        # Grid Tool Toggle
+        # grid tool toggle
         self.grid_mode_var.set(False)
         ttk.Checkbutton(grp_edit, text="Grid Aracı", variable=self.grid_mode_var, style="Switch.TCheckbutton").pack(side=tk.LEFT, padx=10)
         
-        # Group 3: Navigation
+        # group 3: navigation
         grp_nav = ttk.LabelFrame(toolbar, text="Navigasyon", padding=5)
         grp_nav.pack(side=tk.LEFT, padx=5)
         
@@ -568,7 +568,7 @@ class OMRApp:
         self.btn_next = ttk.Button(grp_nav, text="Sonraki >", command=self.next_page, state=tk.DISABLED)
         self.btn_next.pack(side=tk.LEFT, padx=5)
         
-        # Help Button
+        # help button
         ttk.Button(toolbar, text="Yardım / Kısayollar", command=self.show_help).pack(side=tk.RIGHT, padx=10)
 
 
@@ -577,20 +577,20 @@ class OMRApp:
         content_area = ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
         content_area.pack(fill=tk.BOTH, expand=True)
         
-        # Canvas Frame
+        # canvas frame
         self.canvas_frame = ttk.Frame(content_area, style="TFrame")
         content_area.add(self.canvas_frame, weight=3)
         
         self.canvas = tk.Canvas(self.canvas_frame, bg=self.colors["canvas"], bd=0, highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        # ROI Editor Panel
+        # roi editor panel
         self.roi_panel = ttk.Frame(content_area, style="Panel.TFrame", padding=5)
         content_area.add(self.roi_panel, weight=1)
         
         ttk.Label(self.roi_panel, text="Bölge Listesi", style="Header.TLabel").pack(anchor=tk.W, pady=(0, 5))
         
-        # Treeview for ROIs
+        # treeview for rois
         columns = ("label", "value", "subscale")
         self.roi_tree = ttk.Treeview(self.roi_panel, columns=columns, show="headings", selectmode="browse")
         
@@ -608,7 +608,7 @@ class OMRApp:
         self.roi_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Treeview Bindings
+        # treeview bindings
         self.roi_tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.roi_tree.bind("<Double-1>", self.on_roi_list_double_click)
         
@@ -625,27 +625,27 @@ class OMRApp:
         self.canvas.bind("<ButtonRelease-1>", self.on_mouse_up)
         self.canvas.bind("<Button-3>", self.undo_last_roi) # Right click to undo
         
-        # Keyboard Bindings for ROI Manipulation
+        # keyboard bindings
         self.root.bind("<Key>", self.on_key_press)
         
-        # Zoom/Pan Bindings
+        # zoom/pan bindings
         self.canvas.bind("<MouseWheel>", self.on_zoom) # Windows
         self.canvas.bind("<Button-4>", self.on_zoom)   # Linux Scroll Up
         self.canvas.bind("<Button-5>", self.on_zoom)   # Linux Scroll Down
         self.canvas.bind("<ButtonPress-2>", self.start_pan) # Middle click
         self.canvas.bind("<B2-Motion>", self.do_pan)
         
-        # Reset
+        # reset
         self.pages = []
         self.current_page_index = 0
         self.refresh_roi_list()
 
     def refresh_roi_list(self):
-        # Check if treeview exists (it might be destroyed in Scanner Mode)
+        # check if treeview exists (might be destroyed in scanner mode)
         if not hasattr(self, 'roi_tree') or not self.roi_tree.winfo_exists():
             return
 
-        # Clear existing items
+        # clear existing items
         for item in self.roi_tree.get_children():
             self.roi_tree.delete(item)
             
@@ -653,11 +653,11 @@ class OMRApp:
         
         rois = self.pages[self.current_page_index]['rois']
         for i, roi in enumerate(rois):
-            # Insert into treeview
-            # We use the index as iid to easily map back
+            # insert into treeview
+            # use index as iid to map back
             self.roi_tree.insert("", "end", iid=str(i), values=(roi['label'], roi['value'], roi.get('subscale', 'Genel')))
             
-        # Restore selection if valid
+        # restore selection if valid
         if self.selected_roi_index is not None and 0 <= self.selected_roi_index < len(rois):
             self.roi_tree.selection_set(str(self.selected_roi_index))
             self.roi_tree.see(str(self.selected_roi_index))
@@ -680,11 +680,11 @@ class OMRApp:
         rois = self.pages[self.current_page_index]['rois']
         roi = rois[self.selected_roi_index]
         
-        # Open dialog with current values
+        # open dialog with current values
         dialog = RegionPropertiesDialog(self.root, roi['label'], roi.get('subscale', 'Genel'), roi['value'])
         
         if dialog.result:
-            # Update ROI
+            # update roi
             roi['label'] = dialog.result['label']
             roi['value'] = dialog.result['value']
             roi['subscale'] = dialog.result['subscale']
@@ -695,18 +695,18 @@ class OMRApp:
     def on_key_press(self, event):
         if self.current_mode != "DESIGNER": return
         
-        # Check if focus is on an input widget or the treeview
+        # check if focus is on input widget or treeview
         focused_widget = self.root.focus_get()
         if isinstance(focused_widget, (tk.Entry, tk.Text, ttk.Entry)):
             return
             
-        # Special handling for Treeview
+        # special handling for treeview
         if isinstance(focused_widget, ttk.Treeview):
             if event.keysym == "Delete":
-                # Allow Delete
+                # allow delete
                 pass
             else:
-                # Ignore other shortcuts (Arrows for navigation)
+                # ignore other shortcuts
                 return
             
         if self.selected_roi_index is None: return
@@ -717,10 +717,10 @@ class OMRApp:
         
         key = event.keysym
         
-        # Movement step
-        step = 10 if (event.state & 0x0001) else 1 # Shift check (approximate)
-        # Resize mode (Alt key)
-        # Check for Alt key state (usually bit 17 or 131072)
+        # movement step
+        step = 10 if (event.state & 0x0001) else 1 # shift check (approx)
+        # resize mode (alt key)
+        # check for alt key state
         is_alt = (event.state & 0x20000) or (event.state & 131072)
         
         if key == "Delete":
@@ -731,13 +731,13 @@ class OMRApp:
             return
             
         if is_alt:
-            # Resize
+            # resize
             if key == "Left": roi['w'] = max(5, roi['w'] - 1)
             elif key == "Right": roi['w'] += 1
             elif key == "Up": roi['h'] = max(5, roi['h'] - 1)
             elif key == "Down": roi['h'] += 1
         else:
-            # Move
+            # move
             if key == "Left": roi['x'] -= step
             elif key == "Right": roi['x'] += step
             elif key == "Up": roi['y'] -= step
@@ -745,49 +745,49 @@ class OMRApp:
             
         self.refresh_canvas()
     def to_canvas_coords(self, img_x, img_y):
-        """Convert image coordinates to canvas coordinates (screen pixels)"""
-        # (Image Coord * Scale * Zoom) + Pan
+        """convert image coords to canvas coords"""
+        # (image coord * scale * zoom) + pan
         x = (img_x * self.image_scale * self.zoom_scale) + self.pan_x
         y = (img_y * self.image_scale * self.zoom_scale) + self.pan_y
         return x, y
 
     def to_image_coords(self, canvas_x, canvas_y):
-        """Convert canvas coordinates to image coordinates"""
-        # (Canvas Coord - Pan) / (Scale * Zoom)
+        """convert canvas coords to image coords"""
+        # (canvas coord - pan) / (scale * zoom)
         x = (canvas_x - self.pan_x) / (self.image_scale * self.zoom_scale)
         y = (canvas_y - self.pan_y) / (self.image_scale * self.zoom_scale)
         return int(x), int(y)
 
     # ==========================================
-    # ZOOM & PAN HANDLERS
+    # zoom & pan handlers
     # ==========================================
     def on_zoom(self, event):
         if not self.tk_image: return
         
-        # Determine zoom direction
+        # determine zoom direction
         if event.num == 5 or event.delta < 0:
             factor = 0.9
         else:
             factor = 1.1
             
-        # Limit zoom
+        # limit zoom
         new_zoom = self.zoom_scale * factor
         if new_zoom < 0.1 or new_zoom > 10.0:
             return
             
-        # Zoom centered on mouse
-        # Mouse pos in canvas coords
+        # zoom centered on mouse
+        # mouse pos in canvas coords
         mouse_x = self.canvas.canvasx(event.x)
         mouse_y = self.canvas.canvasy(event.y)
         
-        # Mouse pos relative to image (before zoom)
+        # mouse pos relative to image (before zoom)
         rel_x = (mouse_x - self.pan_x) / self.zoom_scale
         rel_y = (mouse_y - self.pan_y) / self.zoom_scale
         
-        # Update zoom
+        # update zoom
         self.zoom_scale = new_zoom
         
-        # Adjust pan to keep mouse point stable
+        # adjust pan to keep mouse point stable
         # new_mouse_x = (rel_x * new_zoom) + new_pan_x
         # we want new_mouse_x == mouse_x
         # so: mouse_x = (rel_x * new_zoom) + new_pan_x
@@ -804,7 +804,7 @@ class OMRApp:
         self.pan_start_y = event.y
 
     def do_pan(self, event):
-        # Calculate delta
+        # calculate delta
         dx = event.x - self.pan_start_x
         dy = event.y - self.pan_start_y
         
@@ -817,10 +817,12 @@ class OMRApp:
         self.refresh_canvas()
 
     def refresh_canvas(self):
-        """Redraws the image and all overlays with current zoom/pan"""
+        """redraw image and overlays with zoom/pan"""
         if not self.pages and not self.input_images: return
         
-        # Determine which image to show
+        if not self.pages and not self.input_images: return
+        
+        # determine image to show
         img = None
         rois = []
         
@@ -834,17 +836,17 @@ class OMRApp:
                 img = self.session_results[self.current_input_index]['aligned_image']
             else:
                 img = self.input_images[self.current_input_index]
-            # Scanner ROIs are drawn separately via draw_scanner_rois
+            # scanner rois drawn separately
             
         if img is None: return
         
-        # Resize logic is now partly handled by zoom
-        # We keep self.image_scale as the "fit to window" base scale
-        # And self.zoom_scale as the user's dynamic zoom
+        # resize logic handled by zoom
+        # keep image_scale as base "fit to window"
+        # zoom_scale is dynamic zoom
         
-        # We need to resize the image for display
-        # NOTE: Resizing the full image every frame on zoom can be slow.
-        # Optimization: Only resize if zoom changed significantly or use PIL
+        # resize image for display
+        # note: resizing full image on zoom can be slow
+        # optimization: only resize if zoom changed significantly or use pil
         
         h, w = img.shape[:2]
         final_scale = self.image_scale * self.zoom_scale
@@ -859,10 +861,10 @@ class OMRApp:
         self.tk_image = ImageTk.PhotoImage(pil_img)
         
         self.canvas.delete("all")
-        # Position image at pan coordinates
+        # position image at pan coords
         self.canvas.create_image(self.pan_x, self.pan_y, anchor=tk.NW, image=self.tk_image)
         
-        # Redraw ROIs
+        # redraw rois
         if self.current_mode == "DESIGNER":
             self.redraw_rois(rois)
         elif self.current_mode == "SCANNER" and self.current_input_index in self.session_results:
@@ -908,7 +910,7 @@ class OMRApp:
             messagebox.showerror("Error", "Could not load images.")
             return
 
-        # Initialize pages
+        # init pages
         self.pages = []
         for img in loaded_imgs:
             self.pages.append({
@@ -974,16 +976,16 @@ class OMRApp:
         self.update_nav_buttons()
 
     def display_image(self, cv_img, rois=None):
-        # Calculate base scale to fit window
+        # calculate base scale to fit window
         h, w = cv_img.shape[:2]
         canvas_h = 700
         canvas_w = 1100
         
         scale_w = canvas_w / w
         scale_h = canvas_h / h
-        self.image_scale = min(scale_w, scale_h, 1.0) # Don't upscale
+        self.image_scale = min(scale_w, scale_h, 1.0) # don't upscale
         
-        # Reset zoom/pan on new image load
+        # reset zoom/pan on new image
         self.zoom_scale = 1.0
         self.pan_x = 0
         self.pan_y = 0
@@ -992,20 +994,20 @@ class OMRApp:
         self.refresh_roi_list()
 
     def on_mouse_down(self, event):
-        self.canvas.focus_set() # Explicitly grab focus
+        self.canvas.focus_set() # grab focus
         if not self.pages: return
         
-        # Check for selection first
+        # check for selection first
         click_x = self.canvas.canvasx(event.x)
         click_y = self.canvas.canvasy(event.y)
         
-        # Convert to image coords to check against ROIs
+        # convert to image coords to check against rois
         img_x, img_y = self.to_image_coords(click_x, click_y)
         
         rois = self.pages[self.current_page_index]['rois']
         clicked_index = None
         
-        # Check in reverse order (topmost first)
+        # check in reverse order (topmost first)
         for i in range(len(rois)-1, -1, -1):
             r = rois[i]
             if (r['x'] <= img_x <= r['x'] + r['w']) and (r['y'] <= img_y <= r['y'] + r['h']):
@@ -1018,13 +1020,13 @@ class OMRApp:
             self.refresh_roi_list()
             return
         else:
-            # Deselect if clicked outside
+            # deselect if visited outside
             if self.selected_roi_index is not None:
                 self.selected_roi_index = None
                 self.refresh_canvas()
                 self.refresh_roi_list()
         
-        # Start drawing new ROI
+        # start drawing new roi
         self.rect_start_x = click_x
         self.rect_start_y = click_y
         self.current_rect = self.canvas.create_rectangle(
@@ -1046,21 +1048,21 @@ class OMRApp:
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
         
-        # Normalize coordinates (top-left, bottom-right)
+        # normalize coords (top-left, bottom-right)
         x1 = min(self.rect_start_x, cur_x)
         y1 = min(self.rect_start_y, cur_y)
         x2 = max(self.rect_start_x, cur_x)
         y2 = max(self.rect_start_y, cur_y)
         
-        # Ignore tiny accidental clicks
+        # ignore tiny accidental clicks
         if (x2 - x1) < 5 or (y2 - y1) < 5:
             self.canvas.delete(self.current_rect)
             self.current_rect = None
             return
 
-        # Check for Grid Mode
+        # check for grid mode
         if self.grid_mode_var.get():
-            # Grid Mode Logic
+            # grid mode
             current_rois = self.pages[self.current_page_index]['rois']
             default_label = f"Q{len(current_rois)+1}"
             
@@ -1076,7 +1078,7 @@ class OMRApp:
             base_label = dialog.result['label']
             subscale = dialog.result['subscale']
             
-            # Convert selection to image coords
+            # convert selection to image coords
             orig_x, orig_y = self.to_image_coords(x1, y1)
             orig_x2, orig_y2 = self.to_image_coords(x2, y2)
             
@@ -1086,7 +1088,7 @@ class OMRApp:
             cell_w = total_w / cols
             cell_h = total_h / rows
             
-            # Create ROIs
+            # create rois
             count = 1
             for r in range(rows):
                 for c in range(cols):
@@ -1096,13 +1098,13 @@ class OMRApp:
                     cell_w_int = int(cell_w)
                     cell_h_int = int(cell_h)
                     
-                    # Generate label (e.g., Q1-1, Q1-2 or just sequential if preferred)
-                    # Using simple sequential suffix for now: Label-1, Label-2...
+                    # generate label (e.g., q1-1, q1-2)
+                    # using simple sequential suffix
                     lbl = f"{base_label}-{count}"
                     
                     roi_data = {
                         "x": cell_x, "y": cell_y, "w": cell_w_int, "h": cell_h_int,
-                        "value": "1", # Default value
+                        "value": "1", # default value
                         "label": lbl,
                         "subscale": subscale
                     }
@@ -1115,7 +1117,7 @@ class OMRApp:
             self.refresh_roi_list()
             return
 
-        # Standard Single ROI Logic
+        # standard single roi
         current_rois = self.pages[self.current_page_index]['rois']
         default_label = f"Madde {len(current_rois)+1}"
         last_subscale = "Genel"
@@ -1124,7 +1126,7 @@ class OMRApp:
             
         dialog = RegionPropertiesDialog(self.root, default_label, last_subscale)
         
-        if dialog.result is None: # User cancelled
+        if dialog.result is None: # user cancelled
             self.canvas.delete(self.current_rect)
             self.current_rect = None
             return
@@ -1133,7 +1135,7 @@ class OMRApp:
         label = dialog.result['label']
         subscale = dialog.result['subscale']
 
-        # Convert canvas coords back to original image coords
+        # convert canvas coords back to image coords
         orig_x, orig_y = self.to_image_coords(x1, y1)
         orig_x2, orig_y2 = self.to_image_coords(x2, y2)
         
@@ -1148,11 +1150,11 @@ class OMRApp:
         }
         self.pages[self.current_page_index]['rois'].append(roi_data)
         
-        # Make rectangle permanent (green)
+        # make rectangle permanent (green)
         self.canvas.delete(self.current_rect)
         self.current_rect = None
         
-        # Redraw all to ensure correct scaling
+        # redraw all
         self.redraw_rois(self.pages[self.current_page_index]['rois'])
         self.refresh_roi_list()
 
@@ -1196,16 +1198,16 @@ Diğer:
     def redraw_rois(self, rois):
         self.canvas.delete("roi")
         for i, item in enumerate(rois):
-            # Apply Zoom/Pan
+            # apply zoom/pan
             x, y = self.to_canvas_coords(item['x'], item['y'])
             w = item['w'] * self.image_scale * self.zoom_scale
             h = item['h'] * self.image_scale * self.zoom_scale
             
-            # Highlight selected
+            # highlight selected
             color = "green"
             width = 2
             if i == self.selected_roi_index:
-                color = "red" # Or yellow, or cyan
+                color = "red" # or yellow, or cyan
                 width = 3
             
             self.canvas.create_rectangle(x, y, x+w, y+h, outline=color, width=width, tags="roi")
@@ -1231,7 +1233,7 @@ Diğer:
         template_pages_data = []
         
         for idx, page in enumerate(self.pages):
-            # Save reference image for this page
+            # save reference image for this page
             ref_save_path = f"{base_name}_p{idx}.jpg"
             print(f"[SAVE] Sayfa {idx+1} - ROI sayısı: {len(page['rois'])}")
             cv2.imwrite(ref_save_path, page['image'])
@@ -1239,7 +1241,7 @@ Diğer:
             
             template_pages_data.append({
                 "page_index": idx,
-                "ref_image_storage": os.path.basename(ref_save_path), # Store relative path
+                "ref_image_storage": os.path.basename(ref_save_path), # store relative path
                 "rois": page['rois']
             })
             
@@ -1261,12 +1263,12 @@ Diğer:
         self.root.title("GÖRÜNGÜ - Tarayıcı Modu (Manuel)")
         self.status_var.set("Tarayıcı Modu: Başlamak için şablon ve resimleri yükleyin.")
         
-        # Control Panel (Left Side)
+        # control panel
         panel = ttk.Frame(self.main_frame, width=320, style="Panel.TFrame", padding=15)
         panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10))
-        panel.pack_propagate(False)  # Maintain fixed width
+        panel.pack_propagate(False)  # fixed width
         
-        # Section 1: Setup
+        # section 1: setup
         lbl_setup = ttk.Label(panel, text="1. Kurulum", style="Header.TLabel")
         lbl_setup.pack(anchor=tk.W, pady=(0, 10))
         
@@ -1282,7 +1284,7 @@ Diğer:
         ttk.Button(frm_setup, text="Resimleri Yükle", command=self.load_filled_form).pack(fill=tk.X, pady=2)
         ttk.Button(frm_setup, text="Klasör Yükle", command=self.load_filled_folder).pack(fill=tk.X, pady=2)
         
-        # Section 2: Navigation
+        # section 2: navigation
         lbl_nav = ttk.Label(panel, text="2. Navigasyon", style="Header.TLabel")
         lbl_nav.pack(anchor=tk.W, pady=(0, 10))
         
@@ -1301,10 +1303,10 @@ Diğer:
         self.btn_scan_next = ttk.Button(nav_inner, text=">", command=self.scan_next_page, state=tk.DISABLED, width=4)
         self.btn_scan_next.pack(side=tk.LEFT)
         
-        # Crop/Align Button
+        # crop/align button
         ttk.Button(frm_nav, text="Kırp/Düzelt", command=self.open_corner_correction).pack(fill=tk.X, pady=(5, 0))
         
-        # Section 3: Scoring
+        # section 3: scoring
         lbl_score = ttk.Label(panel, text="3. Puanlama", style="Header.TLabel")
         lbl_score.pack(anchor=tk.W, pady=(0, 10))
         
@@ -1315,22 +1317,22 @@ Diğer:
         self.cmb_template_page = ttk.Combobox(frm_score, state="readonly")
         self.cmb_template_page.pack(fill=tk.X, pady=(2, 10))
         
-        # Threshold Control
+        # threshold control
         ttk.Label(frm_score, text="İşaretlenme Eşiği (Threshold):").pack(anchor=tk.W, pady=(5, 0))
         
-        # Frame for threshold slider and value label
+        # frame for slider and label
         threshold_frame = ttk.Frame(frm_score)
         threshold_frame.pack(fill=tk.X, pady=(2, 10))
         
-        # Initialize dynamic_threshold if not exists
+        # init dynamic threshold
         if not hasattr(self, 'dynamic_threshold'):
             self.dynamic_threshold = 0.12
         
-        # Threshold value label
+        # threshold value label
         self.lbl_threshold_value = ttk.Label(threshold_frame, text=f"{self.dynamic_threshold:.3f}", width=6)
         self.lbl_threshold_value.pack(side=tk.RIGHT)
         
-        # Threshold slider
+        # threshold slider
         self.threshold_slider = tk.Scale(
             threshold_frame,
             from_=0.01,
@@ -1338,7 +1340,7 @@ Diğer:
             resolution=0.001,
             orient=tk.HORIZONTAL,
             command=self.on_threshold_change,
-            showvalue=0,  # Don't show value on slider itself
+            showvalue=0,  # hide value on slider
             bg=self.colors["panel_bg"],
             fg=self.colors["text"],
             highlightthickness=0,
@@ -1352,27 +1354,27 @@ Diğer:
         self.btn_edit_mode = ttk.Button(frm_score, text="Veri Düzenleme: Kapalı", command=self.toggle_edit_mode)
         self.btn_edit_mode.pack(fill=tk.X)
         
-        # Session Score
+        # session score
         self.lbl_total_score = ttk.Label(panel, text="Toplam Oturum Puanı: 0", font=("Segoe UI", 12, "bold"), background="#e0e7ff", padding=10, anchor=tk.CENTER)
         self.lbl_total_score.pack(fill=tk.X, pady=(0, 5))
         
         ttk.Button(panel, text="Raporu Görüntüle", command=self.show_session_report).pack(fill=tk.X, pady=(0, 10))
         
-        # Center Area: Canvas
+        # center area: canvas
         center_frame = ttk.Frame(self.main_frame, style="TFrame")
         center_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
         
         self.canvas = tk.Canvas(center_frame, bg=self.colors["canvas"], bd=0, highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        # Right Panel: Details
+        # right panel: details
         details_panel = ttk.Frame(self.main_frame, width=320, style="Panel.TFrame", padding=15)
         details_panel.pack(side=tk.RIGHT, fill=tk.Y)
-        details_panel.pack_propagate(False)  # Maintain fixed width
+        details_panel.pack_propagate(False)  # fixed width
         
         ttk.Label(details_panel, text="Detaylar", style="Header.TLabel").pack(anchor=tk.W, pady=(0, 10))
         
-        # Results text area with scrollbar
+        # results text area
         results_frame = ttk.Frame(details_panel)
         results_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -1391,27 +1393,27 @@ Diğer:
         self.txt_results.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=self.txt_results.yview)
         
-        # Zoom & Pan State
+        # zoom & pan state
         self.zoom_scale = 1.0
         self.pan_x = 0
         self.pan_y = 0
         self.pan_start_x = 0
         self.pan_start_y = 0
         
-        # Bindings
+        # bindings
         self.canvas.bind("<Button-1>", self.on_mouse_down)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_mouse_up)
-        self.canvas.bind("<Button-3>", self.undo_last_roi) # Right click to undo
+        self.canvas.bind("<Button-3>", self.undo_last_roi) # right click undo
         
-        # Zoom/Pan Bindings
-        self.canvas.bind("<MouseWheel>", self.on_zoom) # Windows
-        self.canvas.bind("<Button-4>", self.on_zoom)   # Linux Scroll Up
-        self.canvas.bind("<Button-5>", self.on_zoom)   # Linux Scroll Down
-        self.canvas.bind("<ButtonPress-2>", self.start_pan) # Middle click
+        # zoom/pan bindings
+        self.canvas.bind("<MouseWheel>", self.on_zoom) # windows
+        self.canvas.bind("<Button-4>", self.on_zoom)   # linux scroll up
+        self.canvas.bind("<Button-5>", self.on_zoom)   # linux scroll down
+        self.canvas.bind("<ButtonPress-2>", self.start_pan) # middle click
         self.canvas.bind("<B2-Motion>", self.do_pan)
         
-        # Variables
+        # variables
         self.template_pages = [] 
         self.input_images = []
         self.current_input_index = 0
@@ -1429,28 +1431,26 @@ Diğer:
         current_img = self.input_images[self.current_input_index]
         print(f"[CORNER] Görsel boyutu: {current_img.shape}")
         
-        # Try Auto-Detect First
+        # try auto-detect first
         print("[CORNER] Otomatik köşe tespiti başlatılıyor...")
         found, corners = CornerCorrectionDialog.detect_corners(current_img)
         
         if found:
             print("[CORNER] ✓ Köşeler otomatik tespit edildi")
-            # Auto-warp immediately
-            # Re-use the logic from apply_warp, but we need to duplicate it or make it static too.
-            # For simplicity, let's just instantiate the dialog but not show it if we trust it?
-            # Or better: just do the warp here.
+            # auto-warp immediately
+            # re-using warp logic
             
             src_pts = np.array(corners, dtype="float32")
             
-            # Sort corners first (reuse sort logic or just implement it here)
-            # Let's implement a quick sort here to be safe
+            # sort corners
+            # simple sort impl
             rect = np.zeros((4, 2), dtype="float32")
             s = src_pts.sum(axis=1)
-            rect[0] = src_pts[np.argmin(s)] # TL
-            rect[2] = src_pts[np.argmax(s)] # BR
+            rect[0] = src_pts[np.argmin(s)] # tl
+            rect[2] = src_pts[np.argmax(s)] # br
             diff = np.diff(src_pts, axis=1)
-            rect[1] = src_pts[np.argmin(diff)] # TR
-            rect[3] = src_pts[np.argmax(diff)] # BL
+            rect[1] = src_pts[np.argmin(diff)] # tr
+            rect[3] = src_pts[np.argmax(diff)] # bl
             src_pts = rect
             
             (tl, tr, br, bl) = src_pts
@@ -1473,28 +1473,28 @@ Diğer:
             result_image = cv2.warpPerspective(current_img, M, (maxWidth, maxHeight))
             print(f"[CORNER] ✓ Otomatik düzeltme tamamlandı - Yeni boyut: {result_image.shape}")
             
-            # Update state
+            # update state
             self.input_images[self.current_input_index] = result_image
             if self.current_input_index in self.session_results:
                 del self.session_results[self.current_input_index]
                 self.txt_results.delete(1.0, tk.END)
                 self.update_total_score()
             self.update_scanner_ui()
-            # Optional: Show a small toast or status update instead of popup
+            # optional: toast instead of popup
             self.status_var.set("Otomatik düzeltme uygulandı.")
             print("[CORNER] ✓ İşlem tamamlandı (otomatik)")
             return
 
-        # If not found or low confidence, open dialog
+        # if failed, open dialog
         print("[CORNER] Otomatik tespit başarısız, manuel düzenleme açılıyor...")
         dialog = CornerCorrectionDialog(self.root, current_img, initial_corners=corners)
         
         if dialog.result_image is not None:
             print("[CORNER] ✓ Manuel düzeltme tamamlandı")
-            # Update the image
+            # update image
             self.input_images[self.current_input_index] = dialog.result_image
             
-            # Clear previous results for this page if any
+            # clear previous results
             if self.current_input_index in self.session_results:
                 del self.session_results[self.current_input_index]
                 self.txt_results.delete(1.0, tk.END)
@@ -1539,7 +1539,7 @@ Diğer:
                 else:
                     print(f"[ERROR] Referans görseli bulunamadı: {ref_path}")
         else:
-            # Legacy
+            # legacy format
             print("[TEMPLATE] Eski format (legacy) tespit edildi")
             ref_name = data.get("ref_image_storage", "")
             ref_path = os.path.join(base_dir, ref_name)
@@ -1561,7 +1561,7 @@ Diğer:
         if self.template_pages:
             print(f"[TEMPLATE] ✓ Şablon başarıyla yüklendi - {len(self.template_pages)} sayfa")
             self.lbl_template.config(text=f"{os.path.basename(file_path)} ({len(self.template_pages)} sayfa)", foreground=self.colors["success"])
-            # Update combobox
+            # update combobox
             self.cmb_template_page['values'] = [f"Sayfa {i+1}" for i in range(len(self.template_pages))]
             if self.cmb_template_page['values']:
                 self.cmb_template_page.current(0)
@@ -1620,10 +1620,10 @@ Diğer:
         self.btn_scan_prev.config(state=tk.NORMAL if self.current_input_index > 0 else tk.DISABLED)
         self.btn_scan_next.config(state=tk.NORMAL if self.current_input_index < total - 1 else tk.DISABLED)
         
-        # Display current image
+        # display current image
         self.display_image(self.input_images[self.current_input_index])
         
-        # Auto-select template page if indices match
+        # auto-select template if matching index
         if self.template_pages and self.current_input_index < len(self.template_pages):
             self.cmb_template_page.current(self.current_input_index)
 
@@ -1648,7 +1648,7 @@ Diğer:
             messagebox.showerror("Hata", "Girdi resmi yok.")
             return
             
-        # Get selected template
+        # get selected template
         t_idx = self.cmb_template_page.current()
         if t_idx == -1:
             print("[ERROR] Şablon sayfası seçilmemiş")
@@ -1676,26 +1676,26 @@ Diğer:
             
             print("[ALIGN] ✓ Hizalama başarılı")
             
-            # Score
+            # score
             print("[SCORE] Puanlama işlemi başlatılıyor...")
             page_score, page_subscales, page_log, page_details = self.score_page(aligned, t_page['rois'])
             print(f"[SCORE] ✓ Puanlama tamamlandı - Toplam puan: {page_score}")
             print(f"[SCORE] Alt ölçekler: {page_subscales}")
             
-            # Update Session Scores
+            # update session scores
             self.session_results[self.current_input_index] = {
                 "total": page_score,
                 "subscales": page_subscales,
                 "details": page_details,
-                "aligned_image": aligned, # Store aligned image for re-drawing
-                "rois_def": t_page['rois'] # Store definition for re-calc
+                "aligned_image": aligned, # store aligned image
+                "rois_def": t_page['rois'] # store roi defs
             }
             print(f"[SCORE] Sonuçlar oturuma kaydedildi")
             
             self.update_results_display(page_score, page_log)
             self.update_total_score()
             
-            # Show Visuals
+            # show visuals
             print("[SCORE] Görseller güncelleniyor...")
             self.display_image(aligned)
             self.draw_scanner_rois(page_details)
@@ -1728,9 +1728,9 @@ Diğer:
             self.canvas.unbind("<Button-1>")
 
     def on_threshold_change(self, value):
-        """Callback for threshold slider change"""
+        """threshold slider callback"""
         self.dynamic_threshold = float(value)
-        # Update the label to show current threshold value
+        # update label
         if hasattr(self, 'lbl_threshold_value'):
             self.lbl_threshold_value.config(text=f"{self.dynamic_threshold:.3f}")
 
@@ -1742,7 +1742,7 @@ Diğer:
             print("[EDIT] Bu sayfa için sonuç yok")
             return
         
-        # Find clicked item
+        # find clicked item
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         item = self.canvas.find_closest(x, y)
@@ -1758,13 +1758,13 @@ Diğer:
             print("[EDIT] Tıklanan bölgede ROI bulunamadı")
             return
         
-        # Toggle state
+        # toggle state
         res = self.session_results[self.current_input_index]
         details = res['details']
         
-        # Update threshold based on this manual interaction
-        # If user marks it (was False -> True), we might need to LOWER threshold
-        # If user unmarks it (was True -> False), we might need to RAISE threshold
+        # update threshold automatically
+        # if marked manually, maybe lower threshold
+        # if unmarked manually, maybe raise threshold
         current_fill = details[roi_idx]['fill_ratio']
         was_marked = details[roi_idx]['is_marked']
         
@@ -1772,55 +1772,55 @@ Diğer:
         details[roi_idx]['is_marked'] = not was_marked
         print(f"[EDIT] ROI durumu değiştirildi: {was_marked} -> {details[roi_idx]['is_marked']} (fill_ratio: {current_fill:.3f})")
         
-        # Learn from this interaction
+        # learn from interaction
         self.update_threshold_from_manual_input(not was_marked, current_fill)
         
-        # Recalculate Score
+        # recalc score
         print("[EDIT] Sayfa yeniden hesaplanıyor...")
         self.recalculate_page_score(self.current_input_index)
         
-        # Redraw
+        # redraw
         self.draw_scanner_rois(details)
         print("[EDIT] ✓ ROI düzenleme tamamlandı")
 
     def update_threshold_from_manual_input(self, is_now_marked, fill_ratio):
         """
-        Adapts the dynamic threshold based on user's manual correction.
+        adapt threshold based on user correction.
         """
         if not hasattr(self, 'dynamic_threshold'):
             self.dynamic_threshold = 0.12
             
-        # Learning Rate or "Safety Margin"
+        # learning rate / safety margin
         margin = 0.01
         
         threshold_changed = False
         
         if is_now_marked:
-            # User says this SHOULD be marked.
-            # If current threshold is higher than this fill_ratio, we must lower it.
+            # user says should be marked.
+            # lower threshold if needed.
             if self.dynamic_threshold > fill_ratio:
                 print(f"Learning: Lowering threshold from {self.dynamic_threshold:.3f} to {fill_ratio - margin:.3f}")
                 self.dynamic_threshold = max(0.01, fill_ratio - margin)
                 threshold_changed = True
         else:
-            # User says this SHOULD NOT be marked.
-            # If current threshold is lower than this fill_ratio, we must raise it.
+            # user says should NOT be marked.
+            # raise threshold if needed.
             if self.dynamic_threshold < fill_ratio:
                 print(f"Learning: Raising threshold from {self.dynamic_threshold:.3f} to {fill_ratio + margin:.3f}")
                 self.dynamic_threshold = min(0.90, fill_ratio + margin)
                 threshold_changed = True
         
-        # Update UI elements if threshold was changed
+        # update ui if changed
         if threshold_changed:
-            # Update slider position if it exists
+            # update slider
             if hasattr(self, 'threshold_slider') and self.threshold_slider.winfo_exists():
                 self.threshold_slider.set(self.dynamic_threshold)
             
-            # Update threshold value label if it exists
+            # update label
             if hasattr(self, 'lbl_threshold_value') and self.lbl_threshold_value.winfo_exists():
                 self.lbl_threshold_value.config(text=f"{self.dynamic_threshold:.3f}")
             
-            # Update status bar to inform user
+            # update status
             self.status_var.set(f"Eşik değeri otomatik olarak {self.dynamic_threshold:.3f} değerine güncellendi.")
 
     def recalculate_page_score(self, input_idx):
@@ -1850,11 +1850,11 @@ Diğer:
             
             p_log.append(f"{status} {label} [{subscale}]: {val_str if is_marked else '0'} (Manuel)")
             
-        # Update stored results
+        # update stored results
         res['total'] = p_score
         res['subscales'] = p_subscales
         
-        # Update UI if current page
+        # update ui if current page
         if input_idx == self.current_input_index:
             self.update_results_display(p_score, p_log)
             self.update_total_score()
@@ -1863,13 +1863,13 @@ Diğer:
         self.canvas.delete("scanner_roi")
         for idx, item in enumerate(details):
             roi = item['roi_def']
-            # Apply Zoom/Pan
+            # apply zoom/pan
             x, y = self.to_canvas_coords(roi['x'], roi['y'])
             w = roi['w'] * self.image_scale * self.zoom_scale
             h = roi['h'] * self.image_scale * self.zoom_scale
             
             color = "green" if item['is_marked'] else "red"
-            # Draw semi-transparent-like rectangle (outline with width)
+            # draw semi-transparent-like rect
             self.canvas.create_rectangle(x, y, x+w, y+h, outline=color, width=2, tags=("scanner_roi", f"roi_{idx}"))
 
     def show_session_report(self):
@@ -1893,8 +1893,8 @@ Diğer:
         for sub, val in subscale_totals.items():
             report += f"{sub}: {val}\n"
             
-        # Show in a custom dialog or messagebox
-        # Using a simple Toplevel for better visibility
+        # custom dialog for report
+        # simple toplevel
         top = tk.Toplevel(self.root)
         top.title("Sonuç Raporu")
         top.geometry("400x500")
@@ -1903,7 +1903,7 @@ Diğer:
         txt = tk.Text(top, font=("Consolas", 11), bg=self.colors["input_bg"], fg=self.colors["input_fg"], padx=10, pady=10)
         txt.pack(fill=tk.BOTH, expand=True)
         txt.insert(tk.END, report)
-        txt.config(state=tk.DISABLED) # Read-only
+        txt.config(state=tk.DISABLED) # read-only
         
         btn_export = ttk.Button(top, text="Excel'e Aktar (.csv)", command=self.export_report)
         btn_export.pack(fill=tk.X, padx=10, pady=10)
@@ -1918,7 +1918,7 @@ Diğer:
             return
             
         try:
-            # Collect all unique subscales across all pages
+            # collect all unique subscales
             all_subscales = set()
             for res in self.session_results.values():
                 all_subscales.update(res['subscales'].keys())
@@ -1926,22 +1926,22 @@ Diğer:
             
             header = ["Sayfa No", "Toplam Puan"] + sorted_subscales
             
-            with open(file_path, 'w', newline='', encoding='utf-8-sig') as f: # utf-8-sig for Excel compatibility
-                writer = csv.writer(f, delimiter=';') # Semicolon is safer for Excel in some regions
+            with open(file_path, 'w', newline='', encoding='utf-8-sig') as f: # utf-8-sig for excel
+                writer = csv.writer(f, delimiter=';') # semicolon safer for excel in some regions
                 writer.writerow(header)
                 
-                # Write page rows
+                # write page rows
                 for page_idx, res in self.session_results.items():
                     row = [page_idx + 1, res['total']]
                     for sub in sorted_subscales:
                         row.append(res['subscales'].get(sub, 0))
                     writer.writerow(row)
                     
-                # Write Totals Row
+                # write totals row
                 writer.writerow([])
                 total_row = ["GENEL TOPLAM", sum(r['total'] for r in self.session_results.values())]
                 
-                # Calculate subscale totals
+                # calculate subscale totals
                 sub_totals = {sub: 0 for sub in sorted_subscales}
                 for res in self.session_results.values():
                     for sub, val in res['subscales'].items():
@@ -1959,7 +1959,7 @@ Diğer:
 
 
     def score_page(self, aligned_img, rois):
-        # ... (Logic extracted from old process_form) ...
+        # ... logic extracted from old process_form ...
         print(f"[SCORE_PAGE] Sayfa puanlama başladı - {len(rois)} ROI işlenecek")
         gray_aligned = cv2.cvtColor(aligned_img, cv2.COLOR_BGR2GRAY)
         binary = cv2.adaptiveThreshold(gray_aligned, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
@@ -1973,7 +1973,7 @@ Diğer:
         p_log = []
         p_details = []
         
-        # Ensure dynamic threshold exists
+        # ensure dynamic threshold exists
         if not hasattr(self, 'dynamic_threshold'):
             self.dynamic_threshold = 0.12
             print(f"[SCORE_PAGE] Dinamik eşik değeri başlatıldı: {self.dynamic_threshold}")
@@ -1993,26 +1993,24 @@ Diğer:
             roi_w = w - (2 * margin_x)
             roi_h = h - (2 * margin_y)
             
-            # Binary Fill Ratio
+            # binary fill ratio
             roi_bin = binary[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
             non_zero = cv2.countNonZero(roi_bin)
             area = roi_w * roi_h
             if area == 0: area = 1
             fill_ratio = non_zero / area
             
-            # Grayscale Mean Intensity (ROI internal average)
-            # "Roi içi ortalama kullanılabilir"
+            # grayscale mean intensity (avg internal)
             roi_gray = gray_aligned[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
             mean_intensity = cv2.mean(roi_gray)[0]
             
-            # Decision Logic
-            # Primary: Fill Ratio > Dynamic Threshold
-            # Secondary: If very dark (low intensity), consider marked even if ratio is low (Scribble detection)
-            # Heuristic: If mean_intensity < 150 (darker gray) and ratio > 0.05
+            # decision:
+            # primary: fill ratio > threshold
+            # secondary: optional scribble check (disabled)
             
             is_marked = fill_ratio > self.dynamic_threshold
             
-            # Optional: Scribble override (if requested, but sticking to dynamic threshold for now)
+            # optional: scribble override
             # if not is_marked and mean_intensity < 180 and fill_ratio > 0.05:
             #    is_marked = True
             
@@ -2040,15 +2038,15 @@ Diğer:
 
     def align_images(self, img, ref):
         """
-        Aligns 'img' to match 'ref' using SIFT/ORB features.
-        Tries Homography first, checks for sanity, falls back to Affine.
+        align 'img' to 'ref' using sift/orb.
+        tries homography, checks sanity, falls back to affine.
         """
         print("[ALIGN] Görsel hizalama başlatıldı")
         h_ref, w_ref = ref.shape[:2]
         h_img, w_img = img.shape[:2]
         print(f"[ALIGN] Girdi boyutu: {w_img}x{h_img}, Referans boyutu: {w_ref}x{h_ref}")
         
-        # Convert images to grayscale
+        # convert to grayscale
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_ref = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
         
@@ -2085,22 +2083,22 @@ Diğer:
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
             dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
             
-            # Strategy 1: Try Homography (Perspective)
+            # strategy 1: try homography (perspective)
             print("[ALIGN] Homography dönüşümü deneniyor...")
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
             
             is_homography_good = False
             if M is not None:
                 print("[ALIGN] Homography matrisi hesaplandı")
-                # Sanity Check: Check if corners are mapped reasonably
+                # sanity check: check if corners mapped reasonably
                 corners = np.float32([[0, 0], [0, h_img], [w_img, h_img], [w_img, 0]]).reshape(-1, 1, 2)
                 warped_corners = cv2.perspectiveTransform(corners, M)
                 
-                # Calculate area of warped quadrilateral
+                # calc warped area
                 area = cv2.contourArea(warped_corners)
                 ref_area = w_ref * h_ref
                 
-                # If area is drastically different (e.g. < 50% or > 150%), it's likely a bad warp
+                # check for drastic change (< 50% or > 150%)
                 area_ratio = area / ref_area
                 print(f"[ALIGN] Homography alan oranı: {area_ratio:.2f}")
                 if 0.5 < area_ratio < 1.5:
@@ -2115,8 +2113,8 @@ Diğer:
                 print("[ALIGN] ✓ Hizalama başarılı (Homography)")
                 return aligned_img, M
             
-            # Strategy 2: Fallback to Affine (Rigid + Scale)
-            # This is safer for PDFs/Scans that don't have perspective distortion
+            # strategy 2: fallback to affine (rigid + scale)
+            # safer for pdfs/scans without perspective distortion
             print("[ALIGN] Affine dönüşümüne geçiliyor...")
             M_affine, inliers = cv2.estimateAffinePartial2D(src_pts, dst_pts)
             
@@ -2143,7 +2141,7 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.transient(parent)
         self.grab_set()
         
-        # UI Layout
+        # ui layout
         btn_frame = tk.Frame(self, bg="#f0f0f0", pady=10)
         btn_frame.pack(side=tk.BOTTOM, fill=tk.X)
         
@@ -2154,12 +2152,12 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.canvas = tk.Canvas(self, bg="#333333")
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
-        # State
+        # state
         self.corners = initial_corners if initial_corners else [] 
         self.current_handle = None
         self.scale = 1.0
         
-        # Initial display
+        # initial display
         self.display_image()
         if not self.corners:
             self.run_auto_detect()
@@ -2175,7 +2173,7 @@ class CornerCorrectionDialog(tk.Toplevel):
 
     @staticmethod
     def detect_corners(image):
-        """Returns (found_bool, corners_list)"""
+        """returns (found_bool, corners_list)"""
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         edged = cv2.Canny(blurred, 75, 200)
@@ -2190,7 +2188,7 @@ class CornerCorrectionDialog(tk.Toplevel):
             if len(approx) == 4:
                 return True, [p[0].tolist() for p in approx]
                 
-        # Fallback
+        # fallback
         h, w = image.shape[:2]
         m = 50
         corners = [[m, m], [m, h-m], [w-m, h-m], [w-m, m]]
@@ -2222,19 +2220,19 @@ class CornerCorrectionDialog(tk.Toplevel):
         
         if len(self.corners) != 4: return
         
-        # Draw lines connecting corners
+        # lines
         pts = []
         for pt in self.corners:
             pts.append(pt[0] * self.scale)
             pts.append(pt[1] * self.scale)
         
-        # Close the loop
+        # close loop
         pts.append(self.corners[0][0] * self.scale)
         pts.append(self.corners[0][1] * self.scale)
         
         self.canvas.create_line(pts, fill="#00ff00", width=2, tags="line")
         
-        # Draw handles
+        # draw handles
         r = 8
         for idx, pt in enumerate(self.corners):
             x = pt[0] * self.scale
@@ -2249,7 +2247,7 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.draw_handles()
 
     def sort_corners(self):
-        # Sort corners: Top-Left, Top-Right, Bottom-Right, Bottom-Left
+        # sort: tl, tr, br, bl
         pts = np.array(self.corners)
         rect = np.zeros((4, 2), dtype="float32")
         
@@ -2267,7 +2265,7 @@ class CornerCorrectionDialog(tk.Toplevel):
         x = event.x
         y = event.y
         
-        # Find closest handle
+        # find closest handle
         best_dist = 20 # Threshold
         best_idx = -1
         
@@ -2284,12 +2282,12 @@ class CornerCorrectionDialog(tk.Toplevel):
 
     def on_mouse_drag(self, event):
         if self.current_handle is not None:
-            # Update corner position
-            # Convert canvas back to image
+            # update corner position
+            # canvas to image
             img_x = event.x / self.scale
             img_y = event.y / self.scale
             
-            # Clamp
+            # clamp
             h, w = self.cv_image.shape[:2]
             img_x = max(0, min(w, img_x))
             img_y = max(0, min(h, img_y))
@@ -2304,8 +2302,8 @@ class CornerCorrectionDialog(tk.Toplevel):
         # 4 points in source
         src_pts = np.array(self.corners, dtype="float32")
         
-        # 4 points in destination (A4 aspect ratio approx)
-        # Calculate width and height
+        # 4 points in destination (a4 approx)
+        # calc width/height
         (tl, tr, br, bl) = src_pts
         
         widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
@@ -2328,16 +2326,16 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.destroy()
 
 def show_splash_screen(root):
-    """Displays a splash screen with thoth.jpg if available."""
+    """displays splash screen with thoth.jpg if available."""
     try:
-        # Check if thoth.jpg exists
+        # check if thoth.jpg exists
         if not os.path.exists("thoth.jpg"):
             return
 
         splash = tk.Toplevel(root)
-        splash.overrideredirect(True) # No window decorations
+        splash.overrideredirect(True) # no decorations
         
-        # Load image
+        # load image
         pil_img = Image.open("thoth.jpg")
         # Resize if too big, e.g., max 600x400
         pil_img.thumbnail((600, 400))
@@ -2345,7 +2343,7 @@ def show_splash_screen(root):
         
         w, h = pil_img.size
         
-        # Center splash
+        # center splash
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
         x = (screen_width - w) // 2
@@ -2353,28 +2351,28 @@ def show_splash_screen(root):
         splash.geometry(f"{w}x{h}+{x}+{y}")
         
         lbl_img = tk.Label(splash, image=img, bg="black")
-        lbl_img.image = img # Keep reference
+        lbl_img.image = img # keep ref
         lbl_img.pack(fill=tk.BOTH, expand=True)
         
-        # Add Text Overlay
+        # add text overlay
         lbl_title = tk.Label(splash, text="GÖRÜNGÜ", font=("Courier New", 24, "bold"), bg="black", fg="white")
         lbl_title.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
         
-        lbl_subtitle = tk.Label(splash, text="Powered by Thoth Engine", font=("Courier New", 10), bg="black", fg="#C5A572") # Antique Gold
+        lbl_subtitle = tk.Label(splash, text="Powered by Thoth Engine", font=("Courier New", 10), bg="black", fg="#C5A572") # antique gold
         lbl_subtitle.place(relx=0.5, rely=0.9, anchor=tk.CENTER)
         
         splash.update()
         import time
-        time.sleep(2) # Show for 2 seconds
+        time.sleep(2) # show for 2s
         splash.destroy()
     except Exception as e:
         print(f"Splash screen error: {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()
-    # Hide root initially if we want splash to be standalone, 
-    # but usually splash is a toplevel. 
-    # To make it look like a real splash, we can withdraw root, show splash, then deiconify.
+    # hide root initially
+    # normally splash is toplevel
+    # withdraw root, show splash, deiconify
     root.withdraw()
     show_splash_screen(root)
     root.deiconify()

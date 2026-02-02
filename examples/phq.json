@@ -1,0 +1,47 @@
+{
+    "version": "2.0",
+    "pages": [
+        {
+            "page_index": 0,
+            "ref_image_storage": "phq_p0.jpg",
+            "rois": [
+                {
+                    "x": 293,
+                    "y": 109,
+                    "w": 37,
+                    "h": 32,
+                    "value": "-1",
+                    "label": "Madde 1",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 360,
+                    "y": 104,
+                    "w": 50,
+                    "h": 40,
+                    "value": "-2",
+                    "label": "Madde 2",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 434,
+                    "y": 100,
+                    "w": 56,
+                    "h": 45,
+                    "value": "-3",
+                    "label": "Madde 3",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 508,
+                    "y": 94,
+                    "w": 55,
+                    "h": 56,
+                    "value": "-4",
+                    "label": "Madde 4",
+                    "subscale": "Genel"
+                }
+            ]
+        }
+    ]
+}

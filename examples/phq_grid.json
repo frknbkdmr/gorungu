@@ -1,0 +1,335 @@
+{
+    "version": "2.0",
+    "pages": [
+        {
+            "page_index": 0,
+            "ref_image_storage": "phq_grid_p0.jpg",
+            "rois": [
+                {
+                    "x": 297,
+                    "y": 109,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-1",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 109,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-2",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 109,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-3",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 109,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-4",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 162,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-5",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 162,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-6",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 162,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-7",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 162,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-8",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 215,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-9",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 215,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-10",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 215,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-11",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 215,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-12",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 269,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-13",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 269,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-14",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 269,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-15",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 269,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-16",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 322,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-17",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 322,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-18",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 322,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-19",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 322,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-20",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 375,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-21",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 375,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-22",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 375,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-23",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 375,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-24",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 429,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-25",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 429,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-26",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 429,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-27",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 429,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-28",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 482,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-29",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 482,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-30",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 482,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-31",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 482,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-32",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 297,
+                    "y": 535,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-33",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 361,
+                    "y": 535,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-34",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 426,
+                    "y": 535,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-35",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 491,
+                    "y": 535,
+                    "w": 64,
+                    "h": 53,
+                    "value": "1",
+                    "label": "Q1-36",
+                    "subscale": "Genel"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "version": "2.0",
+    "pages": [
+        {
+            "page_index": 0,
+            "ref_image_storage": "pdi_p0.jpg",
+            "rois": []
+        },
+        {
+            "page_index": 1,
+            "ref_image_storage": "pdi_p1.jpg",
+            "rois": [
+                {
+                    "x": 698,
+                    "y": 184,
+                    "w": 47,
+                    "h": 49,
+                    "value": "2",
+                    "label": "Item 1",
+                    "subscale": "General"
+                },
+                {
+                    "x": 691,
+                    "y": 272,
+                    "w": 52,
+                    "h": 52,
+                    "value": "2",
+                    "label": "Item 2",
+                    "subscale": "General"
+                },
+                {
+                    "x": 677,
+                    "y": 345,
+                    "w": 63,
+                    "h": 66,
+                    "value": "2",
+                    "label": "Item 3",
+                    "subscale": "General"
+                },
+                {
+                    "x": 880,
+                    "y": 345,
+                    "w": 52,
+                    "h": 66,
+                    "value": "4",
+                    "label": "Item 4",
+                    "subscale": "General"
+                },
+                {
+                    "x": 984,
+                    "y": 551,
+                    "w": 52,
+                    "h": 49,
+                    "value": "5",
+                    "label": "Item 5",
+                    "subscale": "General"
+                },
+                {
+                    "x": 977,
+                    "y": 468,
+                    "w": 59,
+                    "h": 52,
+                    "value": "5",
+                    "label": "Madde 6",
+                    "subscale": "2"
+                }
+            ]
+        },
+        {
+            "page_index": 2,
+            "ref_image_storage": "pdi_p2.jpg",
+            "rois": [
+                {
+                    "x": 995,
+                    "y": 191,
+                    "w": 71,
+                    "h": 56,
+                    "value": "5",
+                    "label": "Item 1",
+                    "subscale": "General"
+                },
+                {
+                    "x": 696,
+                    "y": 348,
+                    "w": 66,
+                    "h": 54,
+                    "value": "2",
+                    "label": "Item 2",
+                    "subscale": "General"
+                }
+            ]
+        },
+        {
+            "page_index": 3,
+            "ref_image_storage": "pdi_p3.jpg",
+            "rois": []
+        },
+        {
+            "page_index": 4,
+            "ref_image_storage": "pdi_p4.jpg",
+            "rois": []
+        },
+        {
+            "page_index": 5,
+            "ref_image_storage": "pdi_p5.jpg",
+            "rois": []
+        }
+    ]
+}

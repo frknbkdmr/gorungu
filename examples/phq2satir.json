@@ -1,0 +1,83 @@
+{
+    "version": "2.0",
+    "pages": [
+        {
+            "page_index": 0,
+            "ref_image_storage": "phq2satir_p0.jpg",
+            "rois": [
+                {
+                    "x": 298,
+                    "y": 112,
+                    "w": 30,
+                    "h": 22,
+                    "value": "0",
+                    "label": "Madde 1",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 373,
+                    "y": 112,
+                    "w": 32,
+                    "h": 21,
+                    "value": "1",
+                    "label": "Madde 2",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 449,
+                    "y": 108,
+                    "w": 28,
+                    "h": 27,
+                    "value": "2",
+                    "label": "Madde 3",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 528,
+                    "y": 108,
+                    "w": 20,
+                    "h": 23,
+                    "value": "3",
+                    "label": "Madde 4",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 300,
+                    "y": 155,
+                    "w": 28,
+                    "h": 28,
+                    "value": "0",
+                    "label": "Madde 5",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 377,
+                    "y": 155,
+                    "w": 29,
+                    "h": 26,
+                    "value": "1",
+                    "label": "Madde 6",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 450,
+                    "y": 158,
+                    "w": 25,
+                    "h": 23,
+                    "value": "2",
+                    "label": "Madde 7",
+                    "subscale": "Genel"
+                },
+                {
+                    "x": 528,
+                    "y": 155,
+                    "w": 26,
+                    "h": 30,
+                    "value": "3",
+                    "label": "Madde 8",
+                    "subscale": "Genel"
+                }
+            ]
+        }
+    ]
+}

@@ -1,51 +1,98 @@
+"""
+Main Application Module - GÖRÜNGÜ OMR Application
+
+Modernized with customtkinter for a professional, themed UI experience.
+"""
 
 import tkinter as tk
-import tkinter.ttk as ttk
+import customtkinter as ctk
 from tkinter import messagebox
 
 from src import config
 from src.ui import designer, scanner, dialogs
+from src.ui.styles import Style
+
 
 class OMRApp:
-    def __init__(self, root):
+    """
+    Main application class that manages the UI modes and theme.
+    """
+    
+    def __init__(self, root: ctk.CTk):
         self.root = root
         self.root.title("GÖRÜNGÜ - Powered by Thoth Engine")
-        self.root.geometry("1280x850")
+        self.root.geometry("1400x900")
+        self.root.minsize(1200, 700)
+        
+        # Try to increase menu font size (platform dependent)
+        self.root.option_add("*Menu.font", "SegoeUI 12")
         
         print("[APP] GÖRÜNGÜ başlatılıyor...")
         
-        # State
-        self.current_mode = None # "DESIGNER" or "SCANNER"
-        self.mode_instance = None # Instance of DesignerMode or ScannerMode
+        # Initialize style system
+        Style.configure_ctk_appearance()
+        self.colors = Style.get_theme_colors()
         
-        # Theme
-        self.colors = config.THEMES[config.DEFAULT_THEME]
-        self.style = ttk.Style()
-        self.style.theme_use('clam')
-        # UI Structure
-        self.main_frame = ttk.Frame(self.root)
-        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-        self.apply_theme()
+        # State
+        self.current_mode = None  # "DESIGNER" or "SCANNER"
+        self.mode_instance = None  # Instance of DesignerMode or ScannerMode
+        
+        # Configure root window appearance
+        self.root.configure(fg_color=self.colors["bg_primary"])
+        
+        # Main content frame
+        self.main_frame = ctk.CTkFrame(
+            self.root, 
+            fg_color=self.colors["bg_primary"],
+            corner_radius=0
+        )
+        self.main_frame.pack(fill="both", expand=True, padx=0, pady=0)
+        
+        # Status bar at bottom
+        self.status_frame = ctk.CTkFrame(
+            self.root, 
+            height=32, 
+            fg_color=self.colors["bg_secondary"],
+            corner_radius=0
+        )
+        self.status_frame.pack(side="bottom", fill="x")
+        self.status_frame.pack_propagate(False)
         
         self.status_var = tk.StringVar(value="Hazır")
-        self.status_bar = ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W, font=config.FONTS["preferred"]["status"])
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.status_label = ctk.CTkLabel(
+            self.status_frame,
+            textvariable=self.status_var,
+            font=Style.FONTS["small"],
+            text_color=self.colors["text_secondary"],
+            anchor="w"
+        )
+        self.status_label.pack(side="left", padx=Style.PADDING_MD, pady=Style.PADDING_XS)
         
+        # Theme indicator in status bar
+        self.theme_indicator = ctk.CTkLabel(
+            self.status_frame,
+            text=f"Tema: {Style.current_theme.replace('_', ' ').title()}",
+            font=Style.FONTS["small"],
+            text_color=self.colors["text_muted"]
+        )
+        self.theme_indicator.pack(side="right", padx=Style.PADDING_MD, pady=Style.PADDING_XS)
+        
+        # Setup menu
         self.setup_menu()
         
         # Start in Designer Mode
         self.switch_to_designer()
 
     def setup_menu(self):
+        """Setup the application menu bar."""
         self.menu_bar = tk.Menu(self.root)
         self.root.config(menu=self.menu_bar)
         
         # Mode Menu
         self.mode_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="Mod", menu=self.mode_menu)
-        self.mode_menu.add_command(label="Tasarımcı Modu", command=self.switch_to_designer)
-        self.mode_menu.add_command(label="Tarayıcı Modu", command=self.switch_to_scanner)
+        self.mode_menu.add_command(label="🎨 Tasarımcı Modu", command=self.switch_to_designer)
+        self.mode_menu.add_command(label="📷 Tarayıcı Modu", command=self.switch_to_scanner)
         
         # View Menu
         self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
@@ -55,58 +102,56 @@ class OMRApp:
         self.theme_menu = tk.Menu(self.view_menu, tearoff=0)
         self.view_menu.add_cascade(label="Tema", menu=self.theme_menu)
         
-        for theme_name in config.THEMES.keys():
-            display_name = theme_name.replace("_", " ").title()
-            self.theme_menu.add_command(label=display_name, command=lambda t=theme_name: self.set_theme(t))
+        theme_icons = {"dark": "🌙", "light": "☀️", "nile_delta": "🏛️"}
+        for theme_name in Style.THEMES.keys():
+            icon = theme_icons.get(theme_name, "")
+            display_name = f"{icon} {theme_name.replace('_', ' ').title()}"
+            self.theme_menu.add_command(
+                label=display_name, 
+                command=lambda t=theme_name: self.set_theme(t)
+            )
             
         self.view_menu.add_separator()
-        self.view_menu.add_command(label="Hakkında", command=self.show_about)
+        self.view_menu.add_command(label="ℹ️ Hakkında", command=self.show_about)
         
         # Help Menu
         self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="Yardım", menu=self.help_menu)
-        self.help_menu.add_command(label="Hakkında GÖRÜNGÜ", command=self.show_about)
+        self.help_menu.add_command(label="📖 Hakkında GÖRÜNGÜ", command=self.show_about)
 
     def clear_frame(self):
+        """Clear all widgets from the main frame."""
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
-    def set_theme(self, theme_name):
-        if theme_name in config.THEMES:
+    def set_theme(self, theme_name: str):
+        """Change the application theme."""
+        if theme_name in Style.THEMES:
             print(f"[APP] Tema değişti: {theme_name}")
-            self.colors = config.THEMES[theme_name]
+            Style.set_theme(theme_name)
+            Style.configure_ctk_appearance()
+            self.colors = Style.get_theme_colors()
             self.apply_theme()
-            # Re-initialize current mode to apply theme colors completely if needed
-            # For now, just simplistic re-render might be needed 
-            # or we rely on mode using self.app.colors on redraw
+            
+            # Rebuild current mode UI
             if self.mode_instance:
-                 # Ideally modes should have a 'on_theme_change' or we rebuild UI
-                 self.mode_instance.setup_ui(self.main_frame) 
+                self.clear_frame()
+                self.mode_instance.colors = self.colors
+                self.mode_instance.setup_ui(self.main_frame)
 
     def apply_theme(self):
-        # Apply to root
-        self.root.configure(bg=self.colors["bg"])
-        
-        # Configure ttk styles
-        self.style.configure("TFrame", background=self.colors["bg"])
-        self.style.configure("Panel.TFrame", background=self.colors["panel_bg"])
-        self.style.configure("TLabel", background=self.colors["bg"], foreground=self.colors["text"])
-        self.style.configure("Panel.TLabel", background=self.colors["panel_bg"], foreground=self.colors["text"])
-        self.style.configure("Header.TLabel", background=self.colors["panel_bg"], foreground=self.colors["text"])
-        
-        self.style.configure("TButton", background=self.colors["panel_bg"], foreground=self.colors["text"])
-        self.style.map("TButton", background=[('active', self.colors["accent"])], foreground=[('active', 'white')])
-        
-        self.style.configure("Accent.TButton", background=self.colors["accent"], foreground="white")
-        self.style.map("Accent.TButton", background=[('active', self.colors["text"])])
-        
-        self.style.configure("TLabelframe", background=self.colors["panel_bg"], foreground=self.colors["text"])
-        self.style.configure("TLabelframe.Label", background=self.colors["panel_bg"], foreground=self.colors["text"])
-        
-        # Refresh main frame background
-        self.main_frame.configure(style="TFrame")
+        """Apply current theme colors to the application."""
+        self.root.configure(fg_color=self.colors["bg_primary"])
+        self.main_frame.configure(fg_color=self.colors["bg_primary"])
+        self.status_frame.configure(fg_color=self.colors["bg_secondary"])
+        self.status_label.configure(text_color=self.colors["text_secondary"])
+        self.theme_indicator.configure(
+            text=f"Tema: {Style.current_theme.replace('_', ' ').title()}",
+            text_color=self.colors["text_muted"]
+        )
 
     def switch_to_designer(self):
+        """Switch to Designer Mode."""
         self.current_mode = "DESIGNER"
         self.clear_frame()
         self.root.title("GÖRÜNGÜ - Tasarımcı Modu")
@@ -120,6 +165,7 @@ class OMRApp:
         self.root.bind("<Key>", self.on_key_press)
 
     def switch_to_scanner(self):
+        """Switch to Scanner Mode."""
         self.current_mode = "SCANNER"
         self.clear_frame()
         self.root.title("GÖRÜNGÜ - Tarayıcı Modu (Manuel)")
@@ -129,17 +175,18 @@ class OMRApp:
         self.mode_instance = scanner.ScannerMode(self)
         self.mode_instance.setup_ui(self.main_frame)
         
-        # Unbind keys or rebind if scanner needs them
-        self.root.unbind("<Key>") # Scanner doesn't use arrow keys for ROI moving
+        # Unbind keys (Scanner doesn't use arrow keys for ROI moving)
+        self.root.unbind("<Key>")
 
     def on_key_press(self, event):
-        # Route key press to active mode if it handles it
+        """Route key press to active mode if it handles it."""
         if self.current_mode == "DESIGNER" and hasattr(self.mode_instance, 'on_key_press'):
             # Check if focus is on an entry widget to avoid conflict
             focused = self.root.focus_get()
-            if isinstance(focused, (tk.Entry, tk.Text, ttk.Entry)):
+            if isinstance(focused, (tk.Entry, tk.Text, ctk.CTkEntry, ctk.CTkTextbox)):
                 return
             self.mode_instance.on_key_press(event)
 
     def show_about(self):
+        """Show the About dialog."""
         dialogs.AboutDialog(self.root, config.FONTS["preferred"])

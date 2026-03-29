@@ -1,7 +1,14 @@
+"""
+Designer Mode - Modern UI for OMR Template Creation
+
+This module handles the template design workflow with a modernized customtkinter interface.
+All functional logic (ROI creation, grid tool, saving) remains intact.
+"""
 
 import tkinter as tk
-import tkinter.ttk as ttk
+import customtkinter as ctk
 from tkinter import filedialog, messagebox
+import tkinter.ttk as ttk  # Keep ttk.Treeview as CTk doesn't have a replacement
 import cv2
 import numpy as np
 import os
@@ -10,12 +17,19 @@ from PIL import Image, ImageTk
 
 from src.utils import file_io
 from src.ui import dialogs
+from src.ui.styles import Style, create_accent_button, create_secondary_button
 from src import config
 
+
 class DesignerMode:
+    """
+    Designer mode for creating and editing OMR templates.
+    All ROI logic is preserved; only UI presentation is modernized.
+    """
+    
     def __init__(self, app):
-        self.app = app # Reference to main OMRApp for shared resources like root, status_var
-        self.pages = [] 
+        self.app = app  # Reference to main OMRApp
+        self.pages = []
         self.current_page_index = 0
         self.selected_roi_index = None
         self.grid_mode_var = tk.BooleanVar(value=False)
@@ -37,82 +51,276 @@ class DesignerMode:
         self.pan_start_y = 0
         self.image_scale = 1.0
         
-        self.colors = config.THEMES[config.DEFAULT_THEME] # fallback, app should set this
+        # Get colors from style system
+        self.colors = Style.get_theme_colors()
 
     def setup_ui(self, parent_frame):
-        self.colors = self.app.colors
+        """Setup the designer mode UI with modern CTk widgets."""
+        self.colors = Style.get_theme_colors()
         
-        # toolbar
-        toolbar = ttk.Frame(parent_frame, style="Panel.TFrame", padding=10)
-        toolbar.pack(side=tk.TOP, fill=tk.X, pady=(0, 10))
+        # ==========================================================================
+        # TOOLBAR
+        # ==========================================================================
+        toolbar = ctk.CTkFrame(
+            parent_frame, 
+            fg_color=self.colors["bg_secondary"],
+            corner_radius=0,
+            height=60
+        )
+        toolbar.pack(side="top", fill="x", padx=0, pady=0)
+        toolbar.pack_propagate(False)
         
-        # group 1: file operations
-        grp_file = ttk.LabelFrame(toolbar, text="Dosya", padding=5)
-        grp_file.pack(side=tk.LEFT, padx=5)
+        toolbar_content = ctk.CTkFrame(toolbar, fg_color="transparent")
+        toolbar_content.pack(fill="both", expand=True, padx=Style.PADDING_MD, pady=Style.PADDING_SM)
         
-        ttk.Button(grp_file, text="Boş Form Yükle", command=self.load_blank_form).pack(side=tk.LEFT, padx=5)
-        ttk.Button(grp_file, text="Şablon Yükle", command=self.load_template_for_editing).pack(side=tk.LEFT, padx=5)
-        ttk.Button(grp_file, text="Şablonu Kaydet", command=self.save_template, style="Accent.TButton").pack(side=tk.LEFT, padx=5)
+        # Group 1: File Operations
+        grp_file = ctk.CTkFrame(toolbar_content, fg_color="transparent")
+        grp_file.pack(side="left", padx=(0, Style.PADDING_XL))  # Increased spacing between groups
         
-        # group 2: edit
-        grp_edit = ttk.LabelFrame(toolbar, text="Düzenle", padding=5)
-        grp_edit.pack(side=tk.LEFT, padx=5)
-        ttk.Button(grp_edit, text="Sayfayı Temizle", command=self.clear_rois).pack(side=tk.LEFT, padx=5)
+        ctk.CTkLabel(
+            grp_file, 
+            text="DOSYA",
+            font=Style.FONTS["small_bold"],
+            text_color=self.colors["text_muted"]
+        ).pack(side="top", anchor="w")
         
-        self.grid_mode_var.set(False)
-        ttk.Checkbutton(grp_edit, text="Grid Aracı", variable=self.grid_mode_var, style="Switch.TCheckbutton").pack(side=tk.LEFT, padx=10)
+        btn_row1 = ctk.CTkFrame(grp_file, fg_color="transparent")
+        btn_row1.pack(side="top", pady=(Style.PADDING_XS, 0))
         
-        # group 3: navigation
-        grp_nav = ttk.LabelFrame(toolbar, text="Navigasyon", padding=5)
-        grp_nav.pack(side=tk.LEFT, padx=5)
+        create_secondary_button(
+            btn_row1, 
+            text="📁 Boş Form Yükle", 
+            command=self.load_blank_form
+        ).pack(side="left", padx=(0, Style.PADDING_MD))  # Increased button spacing
         
-        self.btn_prev = ttk.Button(grp_nav, text="< Önceki", command=self.prev_page, state=tk.DISABLED)
-        self.btn_prev.pack(side=tk.LEFT, padx=5)
+        create_secondary_button(
+            btn_row1, 
+            text="📂 Şablon Yükle", 
+            command=self.load_template_for_editing
+        ).pack(side="left", padx=(0, Style.PADDING_MD))
         
-        self.lbl_page = ttk.Label(grp_nav, text="Sayfa 1/1")
-        self.lbl_page.pack(side=tk.LEFT, padx=5)
+        create_accent_button(
+            btn_row1, 
+            text="💾 Şablonu Kaydet", 
+            command=self.save_template
+        ).pack(side="left")
         
-        self.btn_next = ttk.Button(grp_nav, text="Sonraki >", command=self.next_page, state=tk.DISABLED)
-        self.btn_next.pack(side=tk.LEFT, padx=5)
+        # Separator
+        ctk.CTkFrame(
+            toolbar_content, 
+            width=1, 
+            fg_color=self.colors["border"]
+        ).pack(side="left", fill="y", padx=Style.PADDING_LG)
         
-        # help button
-        ttk.Button(toolbar, text="Yardım / Kısayollar", command=self.show_help).pack(side=tk.RIGHT, padx=10)
-
-        # Content Area
-        content_area = ttk.PanedWindow(parent_frame, orient=tk.HORIZONTAL)
-        content_area.pack(fill=tk.BOTH, expand=True)
+        # Group 2: Edit Tools
+        grp_edit = ctk.CTkFrame(toolbar_content, fg_color="transparent")
+        grp_edit.pack(side="left", padx=(0, Style.PADDING_XL))
+        
+        ctk.CTkLabel(
+            grp_edit, 
+            text="DÜZENLE",
+            font=Style.FONTS["small_bold"],
+            text_color=self.colors["text_muted"]
+        ).pack(side="top", anchor="w")
+        
+        btn_row2 = ctk.CTkFrame(grp_edit, fg_color="transparent")
+        btn_row2.pack(side="top", pady=(Style.PADDING_XS, 0))
+        
+        create_secondary_button(
+            btn_row2, 
+            text="🗑️ Sayfayı Temizle", 
+            command=self.clear_rois
+        ).pack(side="left", padx=(0, Style.PADDING_MD))
+        
+        self.grid_mode_switch = ctk.CTkSwitch(
+            btn_row2,
+            text="Grid Aracı",
+            variable=self.grid_mode_var,
+            font=Style.FONTS["body"],
+            text_color=self.colors["text_primary"],
+            fg_color=self.colors["bg_tertiary"],
+            progress_color=self.colors["accent"],
+            button_color=self.colors["text_secondary"],
+            button_hover_color=self.colors["text_primary"]
+        )
+        self.grid_mode_switch.pack(side="left")
+        
+        # Separator
+        ctk.CTkFrame(
+            toolbar_content, 
+            width=1, 
+            fg_color=self.colors["border"]
+        ).pack(side="left", fill="y", padx=Style.PADDING_LG)
+        
+        # Group 3: Navigation
+        grp_nav = ctk.CTkFrame(toolbar_content, fg_color="transparent")
+        grp_nav.pack(side="left", padx=(0, Style.PADDING_XL))
+        
+        ctk.CTkLabel(
+            grp_nav, 
+            text="SAYFA",
+            font=Style.FONTS["small_bold"],
+            text_color=self.colors["text_muted"]
+        ).pack(side="top", anchor="w")
+        
+        btn_row3 = ctk.CTkFrame(grp_nav, fg_color="transparent")
+        btn_row3.pack(side="top", pady=(Style.PADDING_XS, 0))
+        
+        self.btn_prev = ctk.CTkButton(
+            btn_row3,
+            text="◀ Önceki",
+            command=self.prev_page,
+            state="disabled",
+            width=100,  # Wider buttons
+            height=Style.BUTTON_HEIGHT_SM,
+            font=Style.FONTS["button"],
+            fg_color=self.colors["bg_tertiary"],
+            hover_color=self.colors["border"],
+            text_color=self.colors["text_primary"],
+            corner_radius=Style.CORNER_RADIUS_SM
+        )
+        self.btn_prev.pack(side="left", padx=(0, Style.PADDING_MD))
+        
+        self.lbl_page = ctk.CTkLabel(
+            btn_row3, 
+            text="Sayfa 1/1",
+            font=Style.FONTS["body_bold"],
+            text_color=self.colors["text_primary"],
+            width=100
+        )
+        self.lbl_page.pack(side="left", padx=Style.PADDING_MD)
+        
+        self.btn_next = ctk.CTkButton(
+            btn_row3,
+            text="Sonraki ▶",
+            command=self.next_page,
+            state="disabled",
+            width=100,  # Wider buttons
+            height=Style.BUTTON_HEIGHT_SM,
+            font=Style.FONTS["button"],
+            fg_color=self.colors["bg_tertiary"],
+            hover_color=self.colors["border"],
+            text_color=self.colors["text_primary"],
+            corner_radius=Style.CORNER_RADIUS_SM
+        )
+        self.btn_next.pack(side="left")
+        
+        # Help button (right side)
+        create_secondary_button(
+            toolbar_content, 
+            text="❓ Yardım", 
+            command=self.show_help
+        ).pack(side="right")
+        
+        # ==========================================================================
+        # CONTENT AREA (Canvas + ROI Panel)
+        # ==========================================================================
+        content_area = ctk.CTkFrame(parent_frame, fg_color=self.colors["bg_primary"])
+        content_area.pack(fill="both", expand=True)
         
         # Canvas Frame
-        self.canvas_frame = ttk.Frame(content_area, style="TFrame")
-        content_area.add(self.canvas_frame, weight=3)
+        self.canvas_frame = ctk.CTkFrame(
+            content_area, 
+            fg_color=self.colors["bg_primary"],
+            corner_radius=0
+        )
+        self.canvas_frame.pack(side="left", fill="both", expand=True)
         
-        self.canvas = tk.Canvas(self.canvas_frame, bg=self.colors["canvas"], bd=0, highlightthickness=0)
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        # Canvas (still using tk.Canvas for rendering compatibility)
+        self.canvas = tk.Canvas(
+            self.canvas_frame, 
+            bg=self.colors["canvas"], 
+            bd=0, 
+            highlightthickness=0
+        )
+        self.canvas.pack(fill="both", expand=True)
         
-        # ROI Panel
-        self.roi_panel = ttk.Frame(content_area, style="Panel.TFrame", padding=5)
-        content_area.add(self.roi_panel, weight=1)
+        # ==========================================================================
+        # ROI PANEL (Right)
+        # ==========================================================================
+        self.roi_panel = ctk.CTkFrame(
+            content_area, 
+            width=280,
+            fg_color=self.colors["bg_secondary"],
+            corner_radius=0
+        )
+        self.roi_panel.pack(side="right", fill="y", padx=0, pady=0)
+        self.roi_panel.pack_propagate(False)
         
-        ttk.Label(self.roi_panel, text="Bölge Listesi", style="Header.TLabel").pack(anchor=tk.W, pady=(0, 5))
+        panel_content = ctk.CTkFrame(self.roi_panel, fg_color="transparent")
+        panel_content.pack(fill="both", expand=True, padx=Style.PADDING_MD, pady=Style.PADDING_MD)
+        
+        # Section header
+        self._create_section_header(panel_content, "BÖLGE LİSTESİ")
+        
+        # ROI Treeview (keeping ttk.Treeview as it has no CTk equivalent)
+        tree_frame = ctk.CTkFrame(panel_content, fg_color="transparent")
+        tree_frame.pack(fill="both", expand=True)
+        
+        # Configure Treeview style
+        style = ttk.Style()
+        style.configure(
+            "Designer.Treeview",
+            background=self.colors["input_bg"],
+            foreground=self.colors["text_primary"],
+            fieldbackground=self.colors["input_bg"],
+            borderwidth=0,
+            font=Style.FONTS["small"]
+        )
+        style.configure(
+            "Designer.Treeview.Heading",
+            background=self.colors["bg_tertiary"],
+            foreground=self.colors["text_primary"],
+            font=Style.FONTS["small_bold"]
+        )
+        style.map("Designer.Treeview", background=[("selected", self.colors["accent"])])
         
         columns = ("label", "value", "subscale")
-        self.roi_tree = ttk.Treeview(self.roi_panel, columns=columns, show="headings", selectmode="browse")
+        self.roi_tree = ttk.Treeview(
+            tree_frame, 
+            columns=columns, 
+            show="headings", 
+            selectmode="browse",
+            style="Designer.Treeview"
+        )
         
         self.roi_tree.heading("label", text="Etiket")
         self.roi_tree.heading("value", text="Değer")
         self.roi_tree.heading("subscale", text="Alt Ölçek")
         
-        self.roi_tree.column("label", width=60)
-        self.roi_tree.column("value", width=40)
-        self.roi_tree.column("subscale", width=80)
+        self.roi_tree.column("label", width=70)
+        self.roi_tree.column("value", width=50)
+        self.roi_tree.column("subscale", width=90)
         
-        scrollbar = ttk.Scrollbar(self.roi_panel, orient=tk.VERTICAL, command=self.roi_tree.yview)
+        scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.roi_tree.yview)
         self.roi_tree.configure(yscroll=scrollbar.set)
         
-        self.roi_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.roi_tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
         
-        # Bindings
+        # Keyboard shortcuts info
+        info_frame = ctk.CTkFrame(panel_content, fg_color=self.colors["bg_tertiary"], corner_radius=Style.CORNER_RADIUS_SM)
+        info_frame.pack(fill="x", pady=(Style.PADDING_MD, 0))
+        
+        ctk.CTkLabel(
+            info_frame,
+            text="⌨️ Kısayollar",
+            font=Style.FONTS["small_bold"],
+            text_color=self.colors["text_secondary"]
+        ).pack(anchor="w", padx=Style.PADDING_SM, pady=(Style.PADDING_SM, 0))
+        
+        shortcuts_text = "↑↓←→: Hareket | Shift+: Hızlı\nAlt+: Boyut | Del: Sil | Sağ-tık: Geri"
+        ctk.CTkLabel(
+            info_frame,
+            text=shortcuts_text,
+            font=Style.FONTS["mono_small"],
+            text_color=self.colors["text_muted"],
+            justify="left"
+        ).pack(anchor="w", padx=Style.PADDING_SM, pady=(0, Style.PADDING_SM))
+        
+        # ==========================================================================
+        # Event Bindings
+        # ==========================================================================
         self.roi_tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.roi_tree.bind("<Double-1>", self.on_roi_list_double_click)
         
@@ -127,14 +335,38 @@ class DesignerMode:
         self.canvas.bind("<ButtonPress-2>", self.start_pan)
         self.canvas.bind("<B2-Motion>", self.do_pan)
         
-        # App-level key binding helper required to route keys to active mode
-        # handled by app.kwy_handler -> self.on_key_press
-        
         self.refresh_roi_list()
+    
+    def _create_section_header(self, parent, text):
+        """Create a styled section header with separator."""
+        frame = ctk.CTkFrame(parent, fg_color="transparent")
+        frame.pack(fill="x", pady=(0, Style.PADDING_MD))
+        
+        lbl = ctk.CTkLabel(
+            frame, 
+            text=text,
+            font=Style.FONTS["small_bold"],
+            text_color=self.colors["text_muted"]
+        )
+        lbl.pack(side="left")
+        
+        sep = ctk.CTkFrame(
+            frame, 
+            height=1, 
+            fg_color=self.colors["border"]
+        )
+        sep.pack(side="left", fill="x", expand=True, padx=(Style.PADDING_SM, 0))
+
+    # ==========================================================================
+    # FUNCTIONAL LOGIC (UNCHANGED)
+    # All methods below preserve the original algorithm logic
+    # ==========================================================================
 
     def load_blank_form(self):
+        """Load a blank form image. Logic unchanged."""
         file_path = filedialog.askopenfilename(filetypes=[("Files", "*.jpg *.jpeg *.png *.bmp *.pdf")])
-        if not file_path: return
+        if not file_path:
+            return
         
         print(f"[DESIGNER] Boş form yükleniyor: {file_path}")
         loaded_imgs = file_io.load_images_from_file(file_path)
@@ -155,8 +387,10 @@ class DesignerMode:
         self.display_current_page()
 
     def load_template_for_editing(self):
+        """Load existing template for editing. Logic unchanged."""
         file_path = filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
-        if not file_path: return
+        if not file_path:
+            return
         
         print(f"[DESIGNER] Düzenleme için şablon yükleniyor: {file_path}")
         
@@ -198,13 +432,15 @@ class DesignerMode:
             messagebox.showerror("Hata", f"Şablon yüklenirken hata oluştu:\n{e}")
 
     def save_template(self):
+        """Save current template. Logic unchanged."""
         print("[SAVE] Şablon kaydetme işlemi başlatıldı")
         if not self.pages:
             messagebox.showwarning("Uyarı", "Yüklü sayfa yok!")
             return
         
         file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
-        if not file_path: return
+        if not file_path:
+            return
         
         base_name = os.path.splitext(file_path)[0]
         template_pages_data = []
@@ -224,6 +460,7 @@ class DesignerMode:
         messagebox.showinfo("Başarılı", f"Şablon kaydedildi: {file_path}")
 
     def display_current_page(self):
+        """Display current page. Logic unchanged."""
         if not self.pages:
             self.canvas.delete("all")
             return
@@ -248,7 +485,9 @@ class DesignerMode:
         self.update_nav_buttons()
 
     def refresh_canvas(self):
-        if not self.pages: return
+        """Refresh canvas display. Logic unchanged."""
+        if not self.pages:
+            return
         
         page = self.pages[self.current_page_index]
         img = page['image']
@@ -259,7 +498,8 @@ class DesignerMode:
         new_w = int(w * final_scale)
         new_h = int(h * final_scale)
         
-        if new_w < 1 or new_h < 1: return
+        if new_w < 1 or new_h < 1:
+            return
         
         resized = cv2.resize(img, (new_w, new_h))
         rgb_img = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
@@ -272,35 +512,47 @@ class DesignerMode:
         self.redraw_rois(rois)
 
     def redraw_rois(self, rois):
+        """Redraw ROI overlays. Logic unchanged."""
         self.canvas.delete("roi")
         for i, item in enumerate(rois):
             x, y = self.to_canvas_coords(item['x'], item['y'])
             w = item['w'] * self.image_scale * self.zoom_scale
             h = item['h'] * self.image_scale * self.zoom_scale
             
-            color = "green"
+            color = "#22c55e"  # Modern green
             width = 2
             if i == self.selected_roi_index:
-                color = "red"
+                color = "#e94560"  # Accent red
                 width = 3
             
             self.canvas.create_rectangle(x, y, x+w, y+h, outline=color, width=width, tags="roi")
             sub = item.get('subscale', 'Genel')
-            self.canvas.create_text(x, y-5, text=f"{item['label']} ({item['value']}) [{sub}]", fill="blue", anchor=tk.SW, tags="roi")
+            self.canvas.create_text(
+                x, y-5, 
+                text=f"{item['label']} ({item['value']}) [{sub}]", 
+                fill="#3b82f6",  # Modern blue
+                anchor=tk.SW, 
+                tags="roi",
+                font=Style.FONTS["small"]
+            )
 
     def to_canvas_coords(self, img_x, img_y):
+        """Convert image coords to canvas coords. Logic unchanged."""
         x = (img_x * self.image_scale * self.zoom_scale) + self.pan_x
         y = (img_y * self.image_scale * self.zoom_scale) + self.pan_y
         return x, y
 
     def to_image_coords(self, canvas_x, canvas_y):
+        """Convert canvas coords to image coords. Logic unchanged."""
         x = (canvas_x - self.pan_x) / (self.image_scale * self.zoom_scale)
         y = (canvas_y - self.pan_y) / (self.image_scale * self.zoom_scale)
         return int(x), int(y)
 
     def on_mouse_down(self, event):
+        """Handle mouse down. Logic unchanged."""
         self.canvas.focus_set()
-        if not self.pages: return
+        if not self.pages:
+            return
         
         click_x = self.canvas.canvasx(event.x)
         click_y = self.canvas.canvasy(event.y)
@@ -333,18 +585,22 @@ class DesignerMode:
         self.current_rect = self.canvas.create_rectangle(
             self.rect_start_x, self.rect_start_y, 
             self.rect_start_x, self.rect_start_y, 
-            outline="red", width=2
+            outline="#e94560", width=2
         )
 
     def on_mouse_drag(self, event):
+        """Handle mouse drag. Logic unchanged."""
         if self.current_rect:
             cur_x = self.canvas.canvasx(event.x)
             cur_y = self.canvas.canvasy(event.y)
             self.canvas.coords(self.current_rect, self.rect_start_x, self.rect_start_y, cur_x, cur_y)
 
     def on_mouse_up(self, event):
-        if not self.current_rect: return
-        if not self.pages: return
+        """Handle mouse up. Logic unchanged."""
+        if not self.current_rect:
+            return
+        if not self.pages:
+            return
         
         cur_x = self.canvas.canvasx(event.x)
         cur_y = self.canvas.canvasy(event.y)
@@ -366,6 +622,7 @@ class DesignerMode:
             self._handle_single_roi_creation(x1, y1, x2, y2)
 
     def _handle_grid_creation(self, x1, y1, x2, y2):
+        """Handle grid ROI creation. Logic unchanged."""
         current_rois = self.pages[self.current_page_index]['rois']
         default_label = f"Q{len(current_rois)+1}"
         
@@ -408,6 +665,7 @@ class DesignerMode:
         self.refresh_roi_list()
 
     def _handle_single_roi_creation(self, x1, y1, x2, y2):
+        """Handle single ROI creation. Logic unchanged."""
         current_rois = self.pages[self.current_page_index]['rois']
         default_label = f"Madde {len(current_rois)+1}"
         last_subscale = current_rois[-1].get('subscale', "Genel") if current_rois else "Genel"
@@ -436,6 +694,7 @@ class DesignerMode:
         self.refresh_roi_list()
 
     def undo_last_roi(self, event):
+        """Undo last ROI. Logic unchanged."""
         if self.pages and self.pages[self.current_page_index]['rois']:
             print("[DESIGNER] Son ROI geri alındı")
             self.pages[self.current_page_index]['rois'].pop()
@@ -443,6 +702,7 @@ class DesignerMode:
             self.refresh_roi_list()
             
     def clear_rois(self):
+        """Clear all ROIs on current page. Logic unchanged."""
         if self.pages:
             print("[DESIGNER] Sayfadaki tüm ROI'ler silindi")
             self.pages[self.current_page_index]['rois'] = []
@@ -450,13 +710,18 @@ class DesignerMode:
             self.refresh_roi_list()
 
     def on_zoom(self, event):
-        if not self.tk_image: return
+        """Handle zoom. Logic unchanged."""
+        if not self.tk_image:
+            return
         
-        if event.num == 5 or event.delta < 0: factor = 0.9
-        else: factor = 1.1
+        if event.num == 5 or event.delta < 0:
+            factor = 0.9
+        else:
+            factor = 1.1
             
         new_zoom = self.zoom_scale * factor
-        if new_zoom < 0.1 or new_zoom > 10.0: return
+        if new_zoom < 0.1 or new_zoom > 10.0:
+            return
             
         mouse_x = self.canvas.canvasx(event.x)
         mouse_y = self.canvas.canvasy(event.y)
@@ -470,11 +735,13 @@ class DesignerMode:
         self.refresh_canvas()
 
     def start_pan(self, event):
+        """Start panning. Logic unchanged."""
         self.canvas.scan_mark(event.x, event.y)
         self.pan_start_x = event.x
         self.pan_start_y = event.y
 
     def do_pan(self, event):
+        """Continue panning. Logic unchanged."""
         dx = event.x - self.pan_start_x
         dy = event.y - self.pan_start_y
         self.pan_x += dx
@@ -484,30 +751,37 @@ class DesignerMode:
         self.refresh_canvas()
             
     def update_nav_buttons(self):
+        """Update navigation buttons. Logic unchanged."""
         total = len(self.pages)
         if total == 0:
-            self.lbl_page.config(text="Sayfa Yok")
-            self.btn_prev.config(state=tk.DISABLED)
-            self.btn_next.config(state=tk.DISABLED)
+            self.lbl_page.configure(text="Sayfa Yok")
+            self.btn_prev.configure(state="disabled")
+            self.btn_next.configure(state="disabled")
             return
-        self.lbl_page.config(text=f"Sayfa {self.current_page_index + 1}/{total}")
-        self.btn_prev.config(state=tk.NORMAL if self.current_page_index > 0 else tk.DISABLED)
-        self.btn_next.config(state=tk.NORMAL if self.current_page_index < total - 1 else tk.DISABLED)
+        self.lbl_page.configure(text=f"Sayfa {self.current_page_index + 1}/{total}")
+        self.btn_prev.configure(state="normal" if self.current_page_index > 0 else "disabled")
+        self.btn_next.configure(state="normal" if self.current_page_index < total - 1 else "disabled")
 
     def prev_page(self):
+        """Navigate to previous page. Logic unchanged."""
         if self.current_page_index > 0:
             self.current_page_index -= 1
             self.display_current_page()
 
     def next_page(self):
+        """Navigate to next page. Logic unchanged."""
         if self.current_page_index < len(self.pages) - 1:
             self.current_page_index += 1
             self.display_current_page()
             
     def refresh_roi_list(self):
-        if not hasattr(self, 'roi_tree') or not self.roi_tree.winfo_exists(): return
-        for item in self.roi_tree.get_children(): self.roi_tree.delete(item)
-        if not self.pages: return
+        """Refresh ROI list in treeview. Logic unchanged."""
+        if not hasattr(self, 'roi_tree') or not self.roi_tree.winfo_exists():
+            return
+        for item in self.roi_tree.get_children():
+            self.roi_tree.delete(item)
+        if not self.pages:
+            return
         
         rois = self.pages[self.current_page_index]['rois']
         for i, roi in enumerate(rois):
@@ -520,13 +794,18 @@ class DesignerMode:
             self.selected_roi_index = None
 
     def on_tree_select(self, event):
+        """Handle treeview selection. Logic unchanged."""
         sel = self.roi_tree.selection()
-        if not sel: self.selected_roi_index = None
-        else: self.selected_roi_index = int(sel[0])
+        if not sel:
+            self.selected_roi_index = None
+        else:
+            self.selected_roi_index = int(sel[0])
         self.refresh_canvas()
 
     def on_roi_list_double_click(self, event):
-        if self.selected_roi_index is None: return
+        """Handle double-click on ROI list. Logic unchanged."""
+        if self.selected_roi_index is None:
+            return
         rois = self.pages[self.current_page_index]['rois']
         roi = rois[self.selected_roi_index]
         
@@ -537,21 +816,23 @@ class DesignerMode:
             self.refresh_canvas()
             
     def show_help(self):
+        """Show help dialog. Logic unchanged."""
         help_text = """
 Kısayollar ve Kullanım:
-Seçim: Tıklama, Liste
-Düzenleme: Çift Tıklama (Liste), Delete (Sil)
-Hareket: Yön Tuşları, Shift+Yön Tuşları
-Boyutlandırma: Alt + Yön Tuşları
-Geri Al: Sağ Tık
+• Seçim: Tıklama, Liste
+• Düzenleme: Çift Tıklama (Liste), Delete (Sil)
+• Hareket: Yön Tuşları, Shift+Yön Tuşları
+• Boyutlandırma: Alt + Yön Tuşları
+• Geri Al: Sağ Tık
 """
         messagebox.showinfo("Yardım", help_text)
 
     def on_key_press(self, event):
-        """Called by main app key handler"""
-        # ... logic for moving/resizing ROIs ...
-        if self.selected_roi_index is None: return
-        if not self.pages: return
+        """Handle keyboard shortcuts. Logic unchanged."""
+        if self.selected_roi_index is None:
+            return
+        if not self.pages:
+            return
         
         rois = self.pages[self.current_page_index]['rois']
         roi = rois[self.selected_roi_index]
@@ -568,14 +849,22 @@ Geri Al: Sağ Tık
             return
             
         if is_alt:
-            if key == "Left": roi['w'] = max(5, roi['w'] - 1)
-            elif key == "Right": roi['w'] += 1
-            elif key == "Up": roi['h'] = max(5, roi['h'] - 1)
-            elif key == "Down": roi['h'] += 1
+            if key == "Left":
+                roi['w'] = max(5, roi['w'] - 1)
+            elif key == "Right":
+                roi['w'] += 1
+            elif key == "Up":
+                roi['h'] = max(5, roi['h'] - 1)
+            elif key == "Down":
+                roi['h'] += 1
         else:
-            if key == "Left": roi['x'] -= step
-            elif key == "Right": roi['x'] += step
-            elif key == "Up": roi['y'] -= step
-            elif key == "Down": roi['y'] += step
+            if key == "Left":
+                roi['x'] -= step
+            elif key == "Right":
+                roi['x'] += step
+            elif key == "Up":
+                roi['y'] -= step
+            elif key == "Down":
+                roi['y'] += step
             
         self.refresh_canvas()

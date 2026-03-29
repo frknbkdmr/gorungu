@@ -1,55 +1,141 @@
+"""
+Dialogs Module - Modern CTk-based dialogs for GÖRÜNGÜ
+
+All dialogs modernized with customtkinter while preserving functional logic.
+"""
 
 import tkinter as tk
-import tkinter.ttk as ttk
+import customtkinter as ctk
 from tkinter import messagebox
 import cv2
 import numpy as np
 from PIL import Image, ImageTk
 
 from src.core import omr_engine
+from src.ui.styles import Style
 
-class RegionPropertiesDialog(tk.Toplevel):
+
+class RegionPropertiesDialog(ctk.CTkToplevel):
+    """Dialog for editing ROI properties."""
+    
     def __init__(self, parent, default_label="", default_subscale="General", default_value=""):
         super().__init__(parent)
-        self.title("Region Properties")
-        window_width = 300
-        window_height = 250
+        self.title("Bölge Özellikleri")
+        
+        colors = Style.get_theme_colors()
+        
+        # Window setup
+        window_width = 360
+        window_height = 320
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.configure(fg_color=colors["bg_primary"])
+        
         self.result = None
         
-        # make modal
+        # Make modal
         self.transient(parent)
         self.grab_set()
         
-        # layout
-        pad = 10
+        # Content
+        content = ctk.CTkFrame(self, fg_color="transparent")
+        content.pack(fill="both", expand=True, padx=Style.PADDING_LG, pady=Style.PADDING_LG)
         
-        tk.Label(self, text="Etiket (Örn: S1-A):").pack(anchor=tk.W, padx=pad, pady=(pad, 0))
-        self.ent_label = tk.Entry(self)
+        # Header
+        ctk.CTkLabel(
+            content,
+            text="📝 Bölge Özellikleri",
+            font=Style.FONTS["header_md"],
+            text_color=colors["text_primary"]
+        ).pack(anchor="w", pady=(0, Style.PADDING_LG))
+        
+        # Label field
+        ctk.CTkLabel(
+            content,
+            text="Etiket (Örn: S1-A):",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_label = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_label.insert(0, default_label)
-        self.ent_label.pack(fill=tk.X, padx=pad, pady=(0, pad))
+        self.ent_label.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
         
-        tk.Label(self, text="Değer/Puan (Örn: 1, 5, A):").pack(anchor=tk.W, padx=pad)
-        self.ent_value = tk.Entry(self)
+        # Value field
+        ctk.CTkLabel(
+            content,
+            text="Değer/Puan (Örn: 1, 5, A):",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_value = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_value.insert(0, default_value)
-        self.ent_value.pack(fill=tk.X, padx=pad, pady=(0, pad))
-        self.ent_value.focus_set() # focus on value since it's most common
+        self.ent_value.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
+        self.ent_value.focus_set()
         
-        tk.Label(self, text="Alt Ölçek (Örn: Depresyon):").pack(anchor=tk.W, padx=pad)
-        self.ent_subscale = tk.Entry(self)
+        # Subscale field
+        ctk.CTkLabel(
+            content,
+            text="Alt Ölçek (Örn: Depresyon):",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_subscale = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_subscale.insert(0, default_subscale)
-        self.ent_subscale.pack(fill=tk.X, padx=pad, pady=(0, pad))
+        self.ent_subscale.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
         
         # Buttons
-        btn_frame = tk.Frame(self)
-        btn_frame.pack(fill=tk.X, padx=pad, pady=pad)
+        btn_frame = ctk.CTkFrame(content, fg_color="transparent")
+        btn_frame.pack(fill="x", pady=(Style.PADDING_MD, 0))
         
-        tk.Button(btn_frame, text="OK", command=self.on_ok, width=10, bg="#dddddd").pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="Cancel", command=self.destroy, width=10).pack(side=tk.LEFT, padx=5)
+        ctk.CTkButton(
+            btn_frame,
+            text="✓ Tamam",
+            command=self.on_ok,
+            font=Style.FONTS["button"],
+            fg_color=colors["accent"],
+            hover_color=colors["accent_hover"],
+            height=Style.BUTTON_HEIGHT,
+            width=100
+        ).pack(side="left", padx=(0, Style.PADDING_SM))
+        
+        ctk.CTkButton(
+            btn_frame,
+            text="İptal",
+            command=self.destroy,
+            font=Style.FONTS["button"],
+            fg_color=colors["bg_tertiary"],
+            hover_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.BUTTON_HEIGHT,
+            width=100
+        ).pack(side="left")
         
         self.bind("<Return>", lambda e: self.on_ok())
         self.bind("<Escape>", lambda e: self.destroy())
@@ -57,6 +143,7 @@ class RegionPropertiesDialog(tk.Toplevel):
         self.wait_window(self)
 
     def on_ok(self):
+        """Handle OK button click. Logic unchanged."""
         val = self.ent_value.get().strip()
         lbl = self.ent_label.get().strip()
         sub = self.ent_subscale.get().strip()
@@ -72,49 +159,145 @@ class RegionPropertiesDialog(tk.Toplevel):
         self.result = {"value": val, "label": lbl, "subscale": sub}
         self.destroy()
 
-class GridDialog(tk.Toplevel):
+
+class GridDialog(ctk.CTkToplevel):
+    """Dialog for creating grid of ROIs."""
+    
     def __init__(self, parent, default_label="Q1"):
         super().__init__(parent)
         self.title("Grid Oluştur")
-        window_width = 300
-        window_height = 250
+        
+        colors = Style.get_theme_colors()
+        
+        # Window setup
+        window_width = 360
+        window_height = 360
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.configure(fg_color=colors["bg_primary"])
+        
         self.result = None
         
         self.transient(parent)
         self.grab_set()
         
-        pad = 10
+        # Content
+        content = ctk.CTkFrame(self, fg_color="transparent")
+        content.pack(fill="both", expand=True, padx=Style.PADDING_LG, pady=Style.PADDING_LG)
         
-        tk.Label(self, text="Satır Sayısı:").pack(anchor=tk.W, padx=pad, pady=(pad, 0))
-        self.ent_rows = tk.Entry(self)
+        # Header
+        ctk.CTkLabel(
+            content,
+            text="⊞ Grid Oluştur",
+            font=Style.FONTS["header_md"],
+            text_color=colors["text_primary"]
+        ).pack(anchor="w", pady=(0, Style.PADDING_LG))
+        
+        # Rows field
+        ctk.CTkLabel(
+            content,
+            text="Satır Sayısı:",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_rows = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_rows.insert(0, "1")
-        self.ent_rows.pack(fill=tk.X, padx=pad)
+        self.ent_rows.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_SM))
         
-        tk.Label(self, text="Sütun Sayısı:").pack(anchor=tk.W, padx=pad)
-        self.ent_cols = tk.Entry(self)
+        # Columns field
+        ctk.CTkLabel(
+            content,
+            text="Sütun Sayısı:",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_cols = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_cols.insert(0, "5")
-        self.ent_cols.pack(fill=tk.X, padx=pad)
+        self.ent_cols.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_SM))
         
-        tk.Label(self, text="Başlangıç Etiketi (Örn: S1):").pack(anchor=tk.W, padx=pad)
-        self.ent_label = tk.Entry(self)
+        # Label field
+        ctk.CTkLabel(
+            content,
+            text="Başlangıç Etiketi (Örn: S1):",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_label = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_label.insert(0, default_label)
-        self.ent_label.pack(fill=tk.X, padx=pad)
+        self.ent_label.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_SM))
         
-        tk.Label(self, text="Alt Ölçek:").pack(anchor=tk.W, padx=pad)
-        self.ent_subscale = tk.Entry(self)
+        # Subscale field
+        ctk.CTkLabel(
+            content,
+            text="Alt Ölçek:",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_subscale = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
         self.ent_subscale.insert(0, "Genel")
-        self.ent_subscale.pack(fill=tk.X, padx=pad)
+        self.ent_subscale.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
         
-        btn_frame = tk.Frame(self)
-        btn_frame.pack(fill=tk.X, padx=pad, pady=pad)
+        # Buttons
+        btn_frame = ctk.CTkFrame(content, fg_color="transparent")
+        btn_frame.pack(fill="x", pady=(Style.PADDING_MD, 0))
         
-        tk.Button(btn_frame, text="Oluştur", command=self.on_ok, width=10, bg="#dddddd").pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="İptal", command=self.destroy, width=10).pack(side=tk.LEFT, padx=5)
+        ctk.CTkButton(
+            btn_frame,
+            text="✓ Oluştur",
+            command=self.on_ok,
+            font=Style.FONTS["button"],
+            fg_color=colors["accent"],
+            hover_color=colors["accent_hover"],
+            height=Style.BUTTON_HEIGHT,
+            width=100
+        ).pack(side="left", padx=(0, Style.PADDING_SM))
+        
+        ctk.CTkButton(
+            btn_frame,
+            text="İptal",
+            command=self.destroy,
+            font=Style.FONTS["button"],
+            fg_color=colors["bg_tertiary"],
+            hover_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.BUTTON_HEIGHT,
+            width=100
+        ).pack(side="left")
         
         self.bind("<Return>", lambda e: self.on_ok())
         self.bind("<Escape>", lambda e: self.destroy())
@@ -122,6 +305,7 @@ class GridDialog(tk.Toplevel):
         self.wait_window(self)
 
     def on_ok(self):
+        """Handle OK button click. Logic unchanged."""
         try:
             rows = int(self.ent_rows.get())
             cols = int(self.ent_cols.get())
@@ -136,209 +320,235 @@ class GridDialog(tk.Toplevel):
         except ValueError:
             messagebox.showerror("Hata", "Lütfen geçerli sayısal değerler girin.")
 
-class AboutDialog(tk.Toplevel):
+
+class AboutDialog(ctk.CTkToplevel):
+    """Modern About dialog with click-to-close."""
+    
     def __init__(self, parent, fonts=None):
         super().__init__(parent)
         self.title("Hakkında")
         self.fonts = fonts if fonts else {}
         
-        # window config - frameless minimal design
-        self.overrideredirect(True)  # remove window decorations
-        self.configure(bg="#212121")  # deep charcoal grey
+        # Frameless design
+        self.overrideredirect(True)
+        self.configure(fg_color="#1a1a2e")  # Dark background
         
-        # Fixed size
+        # Window setup
         window_width = 600
-        window_height = 500
-        
-        # Center on screen
+        window_height = 520
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
         
-        # make modal and always on top
         self.transient(parent)
-        self.attributes('-topmost', True)  # always on top
-        
-        # Force window to update and become visible
+        self.attributes('-topmost', True)
         self.update_idletasks()
-        
-        # Bring to front
         self.lift()
         self.focus_force()
-        
-        # Now grab focus
         self.grab_set()
         
-        # track if we should close
-        self.should_close = False
-        
-        # click anywhere to close - but not immediately
-        def delayed_close(event):
-            self.should_close = True
+        # Click anywhere to close
+        def close_on_click(event):
             self.destroy()
         
-        self.bind("<Button-1>", delayed_close)
+        self.bind("<Button-1>", close_on_click)
+        self.bind("<Escape>", lambda e: self.destroy())
         
-        # Main container with generous padding
-        container = tk.Frame(self, bg="#212121")
-        container.pack(fill=tk.BOTH, expand=True, padx=60, pady=60)
+        # Main container
+        container = ctk.CTkFrame(self, fg_color="transparent")
+        container.pack(fill="both", expand=True, padx=60, pady=60)
+        container.bind("<Button-1>", close_on_click)
         
-        # Resolve fonts
-        header_font = self.fonts.get("header", ("Arial", 32, "bold"))
-        mono_font = self.fonts.get("mono", ("Courier", 9))
-        label_font = self.fonts.get("label", ("Arial", 10, "bold"))
-        name_font = self.fonts.get("name", ("Arial", 18, "normal"))
-        title_font = self.fonts.get("title", ("Arial", 12, "normal"))
-        quote_font = self.fonts.get("quote", ("Times New Roman", 11, "italic"))
-        engine_font = self.fonts.get("engine", ("Courier", 8))
-        
-        # === block a: identity (the header) ===
-        header_frame = tk.Frame(container, bg="#212121")
+        # === Header Block ===
+        header_frame = ctk.CTkFrame(container, fg_color="transparent")
         header_frame.pack(pady=(0, 20))
+        header_frame.bind("<Button-1>", close_on_click)
         
-        # Application Name
-        lbl_name = tk.Label(
+        lbl_name = ctk.CTkLabel(
             header_frame,
             text="GÖRÜNGÜ",
-            font=header_font,
-            bg="#212121",
-            fg="#FFFFFF"
+            font=("Courier New", 36, "bold"),
+            text_color="#ffffff"
         )
         lbl_name.pack()
-        lbl_name.bind("<Button-1>", delayed_close)
+        lbl_name.bind("<Button-1>", close_on_click)
         
-        # Version
-        lbl_version = tk.Label(
+        lbl_version = ctk.CTkLabel(
             header_frame,
             text="v1.0.0 (Beta)",
-            font=mono_font,
-            bg="#212121",
-            fg="#B0B0B0"
+            font=Style.FONTS["mono"],
+            text_color="#a0a0a0"
         )
-        lbl_version.pack(pady=(5, 15))
-        lbl_version.bind("<Button-1>", delayed_close)
+        lbl_version.pack(pady=(8, 15))
+        lbl_version.bind("<Button-1>", close_on_click)
         
-        # Decorative line (60% width)
-        line_frame = tk.Frame(header_frame, bg="#B0B0B0", height=1)
-        line_frame.pack(fill=tk.X, padx=80)
-        line_frame.bind("<Button-1>", delayed_close)
+        # Decorative line
+        line = ctk.CTkFrame(header_frame, height=1, fg_color="#3d3d5c", corner_radius=0)
+        line.pack(fill="x", padx=80)
+        line.bind("<Button-1>", close_on_click)
         
-        # === block b: signature (the creator) ===
-        creator_frame = tk.Frame(container, bg="#212121")
+        # === Creator Block ===
+        creator_frame = ctk.CTkFrame(container, fg_color="transparent")
         creator_frame.pack(pady=(30, 0))
+        creator_frame.bind("<Button-1>", close_on_click)
         
-        # Label "GELİŞTİRİCİ"
-        lbl_dev_label = tk.Label(
+        lbl_dev_label = ctk.CTkLabel(
             creator_frame,
             text="GELİŞTİRİCİ",
-            font=label_font,
-            bg="#212121",
-            fg="#C5A572"  # antique gold
+            font=Style.FONTS["small_bold"],
+            text_color="#c5a572"  # Antique gold
         )
         lbl_dev_label.pack()
-        lbl_dev_label.bind("<Button-1>", delayed_close)
+        lbl_dev_label.bind("<Button-1>", close_on_click)
         
-        # Developer Name
-        lbl_dev_name = tk.Label(
+        lbl_dev_name = ctk.CTkLabel(
             creator_frame,
             text="Dr. Furkan BEKDEMİR",
-            font=name_font,
-            bg="#212121",
-            fg="#FFFFFF"
+            font=("Segoe UI", 20, "normal"),
+            text_color="#ffffff"
         )
         lbl_dev_name.pack(pady=(8, 0))
-        lbl_dev_name.bind("<Button-1>", delayed_close)
+        lbl_dev_name.bind("<Button-1>", close_on_click)
         
-        # Title
-        lbl_dev_title = tk.Label(
+        lbl_dev_title = ctk.CTkLabel(
             creator_frame,
             text="Psikiyatri Asistanı",
-            font=title_font,
-            bg="#212121",
-            fg="#B0B0B0"
+            font=Style.FONTS["body"],
+            text_color="#a0a0a0"
         )
         lbl_dev_title.pack(pady=(5, 0))
-        lbl_dev_title.bind("<Button-1>", delayed_close)
+        lbl_dev_title.bind("<Button-1>", close_on_click)
         
-        # === block c: soul (the philosophy) ===
-        philosophy_frame = tk.Frame(container, bg="#212121")
+        # === Philosophy Block ===
+        philosophy_frame = ctk.CTkFrame(container, fg_color="transparent")
         philosophy_frame.pack(pady=(40, 0))
+        philosophy_frame.bind("<Button-1>", close_on_click)
         
-        # quote - serif font for philosophical touch
-        lbl_quote = tk.Label(
+        lbl_quote = ctk.CTkLabel(
             philosophy_frame,
             text='"to achieve great things, two things are needed:\na plan, and not quite enough time."',
-            font=quote_font,
-            bg="#212121",
-            fg="#B0B0B0",
-            justify=tk.CENTER,
-            wraplength=400
+            font=("Georgia", 12, "italic"),
+            text_color="#808080",
+            justify="center"
         )
         lbl_quote.pack()
-        lbl_quote.bind("<Button-1>", delayed_close)
+        lbl_quote.bind("<Button-1>", close_on_click)
         
-        # === block d: engine (the footer) ===
-        footer_frame = tk.Frame(container, bg="#212121")
-        footer_frame.pack(side=tk.BOTTOM, pady=(0, 0))
+        # === Footer Block ===
+        footer_frame = ctk.CTkFrame(container, fg_color="transparent")
+        footer_frame.pack(side="bottom")
+        footer_frame.bind("<Button-1>", close_on_click)
         
-        # powered by text - barely visible
-        lbl_engine = tk.Label(
+        lbl_engine = ctk.CTkLabel(
             footer_frame,
             text="Powered by Thoth Engine",
-            font=engine_font,
-            bg="#212121",
-            fg="#4A4A4A"  # very dark grey, almost invisible
+            font=("Courier New", 9),
+            text_color="#4a4a6a"
         )
         lbl_engine.pack()
-        lbl_engine.bind("<Button-1>", delayed_close)
+        lbl_engine.bind("<Button-1>", close_on_click)
         
-        # bind container click as well
-        container.bind("<Button-1>", delayed_close)
-        
-        # subtle border to define the window edge
-        self.configure(highlightbackground="#4A4A4A", highlightthickness=1)
-        
-        # esc key to close
-        self.bind("<Escape>", lambda e: self.destroy())
+        # Hint text
+        lbl_hint = ctk.CTkLabel(
+            footer_frame,
+            text="Kapatmak için herhangi bir yere tıklayın",
+            font=Style.FONTS["small"],
+            text_color="#3d3d5c"
+        )
+        lbl_hint.pack(pady=(15, 0))
+        lbl_hint.bind("<Button-1>", close_on_click)
         
         self.wait_window(self)
 
-class CornerCorrectionDialog(tk.Toplevel):
+
+class CornerCorrectionDialog(ctk.CTkToplevel):
+    """Dialog for manual corner correction with draggable handles."""
+    
     def __init__(self, parent, cv_image, initial_corners=None):
         super().__init__(parent)
         self.title("Köşe Düzeltme")
-        window_width = 1000
-        window_height = 800
+        
+        colors = Style.get_theme_colors()
+        
+        # Window setup
+        window_width = 1050
+        window_height = 850
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.configure(fg_color=colors["bg_primary"])
+        
         self.cv_image = cv_image.copy()
         self.result_image = None
         
         self.transient(parent)
         self.grab_set()
         
-        # ui layout
-        btn_frame = tk.Frame(self, bg="#f0f0f0", pady=10)
-        btn_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        # Toolbar
+        toolbar = ctk.CTkFrame(self, fg_color=colors["bg_secondary"], height=60, corner_radius=0)
+        toolbar.pack(side="top", fill="x")
+        toolbar.pack_propagate(False)
         
-        tk.Button(btn_frame, text="Otomatik Bul", command=self.run_auto_detect, width=15).pack(side=tk.LEFT, padx=20)
-        tk.Button(btn_frame, text="Uygula ve Kırp", command=self.apply_warp, width=15, bg="#4caf50", fg="white").pack(side=tk.RIGHT, padx=20)
-        tk.Button(btn_frame, text="İptal", command=self.destroy, width=15).pack(side=tk.RIGHT, padx=20)
+        toolbar_content = ctk.CTkFrame(toolbar, fg_color="transparent")
+        toolbar_content.pack(fill="both", expand=True, padx=Style.PADDING_LG, pady=Style.PADDING_SM)
         
-        self.canvas = tk.Canvas(self, bg="#333333")
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        ctk.CTkLabel(
+            toolbar_content,
+            text="📐 Köşe Düzeltme",
+            font=Style.FONTS["header_md"],
+            text_color=colors["text_primary"]
+        ).pack(side="left")
         
-        # state
-        self.corners = initial_corners if initial_corners else [] 
+        # Buttons on right
+        ctk.CTkButton(
+            toolbar_content,
+            text="İptal",
+            command=self.destroy,
+            font=Style.FONTS["button"],
+            fg_color=colors["bg_tertiary"],
+            hover_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.BUTTON_HEIGHT,
+            width=100
+        ).pack(side="right", padx=(Style.PADDING_SM, 0))
+        
+        ctk.CTkButton(
+            toolbar_content,
+            text="✓ Uygula ve Kırp",
+            command=self.apply_warp,
+            font=Style.FONTS["button"],
+            fg_color=colors["accent"],
+            hover_color=colors["accent_hover"],
+            height=Style.BUTTON_HEIGHT,
+            width=140
+        ).pack(side="right", padx=(Style.PADDING_SM, 0))
+        
+        ctk.CTkButton(
+            toolbar_content,
+            text="🔍 Otomatik Bul",
+            command=self.run_auto_detect,
+            font=Style.FONTS["button"],
+            fg_color=colors["bg_tertiary"],
+            hover_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.BUTTON_HEIGHT,
+            width=120
+        ).pack(side="right")
+        
+        # Canvas
+        self.canvas = tk.Canvas(self, bg=colors["canvas"], bd=0, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        
+        # State
+        self.corners = initial_corners if initial_corners else []
         self.current_handle = None
         self.scale = 1.0
         
-        # initial display
+        # Initial display
         self.display_image()
         if not self.corners:
             self.run_auto_detect()
@@ -353,9 +563,10 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.wait_window(self)
 
     def display_image(self):
+        """Display the image on canvas. Logic unchanged."""
         h, w = self.cv_image.shape[:2]
-        canvas_h = 700
-        canvas_w = 980
+        canvas_h = 750
+        canvas_w = 1020
         
         scale_w = canvas_w / w
         scale_h = canvas_h / h
@@ -373,48 +584,65 @@ class CornerCorrectionDialog(tk.Toplevel):
         self.draw_handles()
 
     def draw_handles(self):
+        """Draw corner handles. Logic unchanged."""
         self.canvas.delete("handle")
         self.canvas.delete("line")
         
-        if len(self.corners) != 4: return
+        if len(self.corners) != 4:
+            return
         
-        # lines
+        # Lines
         pts = []
         for pt in self.corners:
             pts.append(pt[0] * self.scale)
             pts.append(pt[1] * self.scale)
         
-        # close loop
+        # Close loop
         pts.append(self.corners[0][0] * self.scale)
         pts.append(self.corners[0][1] * self.scale)
         
-        self.canvas.create_line(pts, fill="#00ff00", width=2, tags="line")
+        self.canvas.create_line(pts, fill="#22c55e", width=2, tags="line")
         
-        # draw handles
-        r = 8
+        # Draw handles
+        r = 10
+        colors = ["#e94560", "#3b82f6", "#22c55e", "#f59e0b"]  # Different colors for each corner
         for idx, pt in enumerate(self.corners):
             x = pt[0] * self.scale
             y = pt[1] * self.scale
-            self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="red", outline="white", width=2, tags=("handle", f"h_{idx}"))
-            self.canvas.create_text(x, y-20, text=str(idx+1), fill="yellow", font=("Arial", 12, "bold"), tags="handle")
+            self.canvas.create_oval(
+                x-r, y-r, x+r, y+r, 
+                fill=colors[idx], 
+                outline="white", 
+                width=2, 
+                tags=("handle", f"h_{idx}")
+            )
+            self.canvas.create_text(
+                x, y-18, 
+                text=str(idx+1), 
+                fill="white", 
+                font=Style.FONTS["body_bold"], 
+                tags="handle"
+            )
 
     def run_auto_detect(self):
+        """Run auto corner detection. Logic unchanged."""
         found, corners = omr_engine.detect_corners(self.cv_image)
         self.corners = corners
         self.sort_corners_ui()
         self.draw_handles()
 
     def sort_corners_ui(self):
-         # use engine's sort but we need it in list format for UI state
+        """Sort corners for proper ordering. Logic unchanged."""
         rect = omr_engine.sort_corners(self.corners)
         self.corners = rect.tolist()
 
     def on_mouse_down(self, event):
+        """Handle mouse down. Logic unchanged."""
         x = event.x
         y = event.y
         
-        # find closest handle
-        best_dist = 20 # Threshold
+        # Find closest handle
+        best_dist = 25  # Threshold
         best_idx = -1
         
         for idx, pt in enumerate(self.corners):
@@ -429,13 +657,12 @@ class CornerCorrectionDialog(tk.Toplevel):
             self.current_handle = best_idx
 
     def on_mouse_drag(self, event):
+        """Handle mouse drag. Logic unchanged."""
         if self.current_handle is not None:
-            # update corner position
-            # canvas to image
             img_x = event.x / self.scale
             img_y = event.y / self.scale
             
-            # clamp
+            # Clamp
             h, w = self.cv_image.shape[:2]
             img_x = max(0, min(w, img_x))
             img_y = max(0, min(h, img_y))
@@ -444,9 +671,10 @@ class CornerCorrectionDialog(tk.Toplevel):
             self.draw_handles()
 
     def on_mouse_up(self, event):
+        """Handle mouse up. Logic unchanged."""
         self.current_handle = None
 
     def apply_warp(self):
-        # use engine warp
+        """Apply perspective transform. Logic unchanged."""
         self.result_image = omr_engine.get_four_point_transform(self.cv_image, self.corners)
         self.destroy()

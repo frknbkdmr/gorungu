@@ -163,15 +163,18 @@ class RegionPropertiesDialog(ctk.CTkToplevel):
 class GridDialog(ctk.CTkToplevel):
     """Dialog for creating grid of ROIs."""
     
-    def __init__(self, parent, default_label="Q1"):
+    def __init__(self, parent, default_label="Q1", default_rows=1, default_cols=5):
         super().__init__(parent)
         self.title("Grid Oluştur")
+        
+        self.default_rows = default_rows
+        self.default_cols = default_cols
         
         colors = Style.get_theme_colors()
         
         # Window setup
         window_width = 360
-        window_height = 430
+        window_height = 510
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
@@ -212,7 +215,7 @@ class GridDialog(ctk.CTkToplevel):
             text_color=colors["text_primary"],
             height=Style.INPUT_HEIGHT
         )
-        self.ent_rows.insert(0, "1")
+        self.ent_rows.insert(0, str(self.default_rows))
         self.ent_rows.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_SM))
         
         # Columns field
@@ -231,7 +234,7 @@ class GridDialog(ctk.CTkToplevel):
             text_color=colors["text_primary"],
             height=Style.INPUT_HEIGHT
         )
-        self.ent_cols.insert(0, "5")
+        self.ent_cols.insert(0, str(self.default_cols))
         self.ent_cols.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_SM))
         
         # Label field
@@ -272,6 +275,25 @@ class GridDialog(ctk.CTkToplevel):
         self.ent_subscale.insert(0, "Genel")
         self.ent_subscale.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
         
+        # Margin field
+        ctk.CTkLabel(
+            content,
+            text="Kenar Payı / Taşırma (Margin px):",
+            font=Style.FONTS["small_bold"],
+            text_color=colors["text_secondary"]
+        ).pack(anchor="w")
+        
+        self.ent_margin = ctk.CTkEntry(
+            content,
+            font=Style.FONTS["body"],
+            fg_color=colors["input_bg"],
+            border_color=colors["border"],
+            text_color=colors["text_primary"],
+            height=Style.INPUT_HEIGHT
+        )
+        self.ent_margin.insert(0, "4")
+        self.ent_margin.pack(fill="x", pady=(Style.PADDING_XS, Style.PADDING_MD))
+        
         # Buttons
         btn_frame = ctk.CTkFrame(content, fg_color="transparent")
         btn_frame.pack(fill="x", pady=(Style.PADDING_MD, 0))
@@ -305,20 +327,24 @@ class GridDialog(ctk.CTkToplevel):
         self.wait_window(self)
 
     def on_ok(self):
-        """Handle OK button click. Logic unchanged."""
+        """Handle OK button click."""
         try:
             rows = int(self.ent_rows.get())
             cols = int(self.ent_cols.get())
             lbl = self.ent_label.get().strip()
             sub = self.ent_subscale.get().strip()
             
+            margin_str = self.ent_margin.get().strip()
+            margin = int(margin_str) if margin_str else 0
+            
             if rows < 1 or cols < 1:
                 raise ValueError
                 
-            self.result = {"rows": rows, "cols": cols, "label": lbl, "subscale": sub}
+            self.result = {"rows": rows, "cols": cols, "label": lbl, "subscale": sub, "margin": margin}
             self.destroy()
         except ValueError:
             messagebox.showerror("Hata", "Lütfen geçerli sayısal değerler girin.")
+
 
 
 class AboutDialog(ctk.CTkToplevel):

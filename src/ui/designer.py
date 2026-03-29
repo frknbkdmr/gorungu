@@ -33,6 +33,7 @@ class DesignerMode:
         self.current_page_index = 0
         self.selected_roi_index = None
         self.grid_mode_var = tk.BooleanVar(value=False)
+        self.auto_grid_var = tk.BooleanVar(value=False)
         
         # Canvas state
         self.canvas = None
@@ -148,6 +149,17 @@ class DesignerMode:
             button_hover_color=self.colors["text_primary"]
         )
         self.grid_mode_switch.pack(side="left")
+        
+        self.auto_grid_switch = ctk.CTkSwitch(
+            btn_row2,
+            text="✨ Oto Grid",
+            variable=self.auto_grid_var,
+            font=Style.FONTS["body"],
+            text_color=self.colors["text_primary"],
+            fg_color=self.colors["bg_tertiary"],
+            progress_color=self.colors["success"]
+        )
+        self.auto_grid_switch.pack(side="left", padx=(Style.PADDING_MD, 0))
         
         # Separator
         ctk.CTkFrame(
@@ -658,7 +670,9 @@ class DesignerMode:
             return
 
         # Grid or Single
-        if self.grid_mode_var.get():
+        if self.auto_grid_var.get():
+            self._handle_auto_grid_creation(x1, y1, x2, y2)
+        elif self.grid_mode_var.get():
             self._handle_grid_creation(x1, y1, x2, y2)
         else:
             self._handle_single_roi_creation(x1, y1, x2, y2)
@@ -678,6 +692,7 @@ class DesignerMode:
         cols = d.result['cols']
         base_label = d.result['label']
         subscale = d.result['subscale']
+        margin = d.result.get('margin', 0)
         
         orig_x, orig_y = self.to_image_coords(x1, y1)
         orig_x2, orig_y2 = self.to_image_coords(x2, y2)
@@ -692,14 +707,90 @@ class DesignerMode:
             for c in range(cols):
                 cell_x = int(orig_x + (c * cell_w))
                 cell_y = int(orig_y + (r * cell_h))
+                
+                final_x = cell_x - margin
+                final_y = cell_y - margin
+                final_w = int(cell_w) + (2 * margin)
+                final_h = int(cell_h) + (2 * margin)
+                
                 lbl = f"{base_label}-{count}"
                 
                 roi_data = {
-                    "x": cell_x, "y": cell_y, "w": int(cell_w), "h": int(cell_h),
+                    "x": final_x, "y": final_y, "w": final_w, "h": final_h,
                     "value": "1", "label": lbl, "subscale": subscale
                 }
                 self.pages[self.current_page_index]['rois'].append(roi_data)
                 count += 1
+        
+        self.canvas.delete(self.current_rect)
+        self.current_rect = None
+        self.redraw_rois(self.pages[self.current_page_index]['rois'])
+        self.refresh_roi_list()
+
+    def _handle_auto_grid_creation(self, x1, y1, x2, y2):
+        """Handle auto grid ROI creation by capturing literal Top-N discrete islands inside the bounding box."""
+        from src.core import auto_detector
+        
+        orig_x, orig_y = self.to_image_coords(x1, y1)
+        orig_x2, orig_y2 = self.to_image_coords(x2, y2)
+        
+        w = orig_x2 - orig_x
+        h = orig_y2 - orig_y
+        
+        page = self.pages[self.current_page_index]
+        img = page['image']
+        
+        img_h, img_w = img.shape[:2]
+        orig_x = max(0, min(orig_x, img_w))
+        orig_y = max(0, min(orig_y, img_h))
+        w = max(0, min(w, img_w - orig_x))
+        h = max(0, min(h, img_h - orig_y))
+        
+        if w < 10 or h < 10:
+            self.canvas.delete(self.current_rect)
+            self.current_rect = None
+            return
+            
+        current_rois = self.pages[self.current_page_index]['rois']
+        default_label = f"Q{len(current_rois)+1}"
+        
+        d = dialogs.GridDialog(self.app.root, default_label=default_label)
+        if d.result is None:
+            self.canvas.delete(self.current_rect)
+            self.current_rect = None
+            return
+            
+        rows = d.result['rows']
+        cols = d.result['cols']
+        base_label = d.result['label']
+        subscale = d.result['subscale']
+        margin = d.result.get('margin', 0)
+        
+        boxes = auto_detector.find_islands(img, orig_x, orig_y, w, h, rows, cols)
+        
+        if not boxes:
+            messagebox.showwarning("Oto Grid Hatası", "Seçili alanda hiçbir piksel adası (şekil) bulunamadı.", parent=self.app.root)
+            self.canvas.delete(self.current_rect)
+            self.current_rect = None
+            return
+            
+        count = 1
+        for box in boxes:
+            bx, by, bw, bh = box["bx"], box["by"], box["bw"], box["bh"]
+            
+            final_x = bx - margin
+            final_y = by - margin
+            final_w = bw + (2 * margin)
+            final_h = bh + (2 * margin)
+            
+            lbl = f"{base_label}-{count}"
+            
+            roi_data = {
+                "x": final_x, "y": final_y, "w": final_w, "h": final_h,
+                "value": "1", "label": lbl, "subscale": subscale
+            }
+            self.pages[self.current_page_index]['rois'].append(roi_data)
+            count += 1
         
         self.canvas.delete(self.current_rect)
         self.current_rect = None

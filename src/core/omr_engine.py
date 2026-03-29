@@ -71,7 +71,9 @@ def align_images(img, ref):
         M_affine, inliers = cv2.estimateAffinePartial2D(src_pts, dst_pts)
         if M_affine is not None:
             aligned_img = cv2.warpAffine(img, M_affine, (w_ref, h_ref))
-            return aligned_img, M_affine
+            # Pad 2x3 affine matrix to 3x3 for consistency with homography
+            M_padded = np.vstack([M_affine, [0, 0, 1]])
+            return aligned_img, M_padded
         
         return None, None
     else:
@@ -109,13 +111,20 @@ def score_page(aligned_img, rois, threshold=0.12):
         roi_h = h - (2 * margin_y)
         
         roi_bin = binary[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
-        non_zero = cv2.countNonZero(roi_bin)
-        area = roi_w * roi_h
-        if area == 0: area = 1
-        fill_ratio = non_zero / area
         
-        roi_gray = gray_aligned[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
-        mean_intensity = cv2.mean(roi_gray)[0]
+        if roi_w <= 0 or roi_h <= 0 or roi_bin.size == 0:
+            non_zero = 0
+            area = 1
+            fill_ratio = 0.0
+            mean_intensity = 0.0
+        else:
+            non_zero = cv2.countNonZero(roi_bin)
+            area = roi_w * roi_h
+            if area == 0: area = 1
+            fill_ratio = non_zero / area
+            
+            roi_gray = gray_aligned[roi_y:roi_y+roi_h, roi_x:roi_x+roi_w]
+            mean_intensity = cv2.mean(roi_gray)[0]
         
         is_marked = fill_ratio > threshold
         

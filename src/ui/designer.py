@@ -64,11 +64,9 @@ class DesignerMode:
         toolbar = ctk.CTkFrame(
             parent_frame, 
             fg_color=self.colors["bg_secondary"],
-            corner_radius=0,
-            height=60
+            corner_radius=0
         )
         toolbar.pack(side="top", fill="x", padx=0, pady=0)
-        toolbar.pack_propagate(False)
         
         toolbar_content = ctk.CTkFrame(toolbar, fg_color="transparent")
         toolbar_content.pack(fill="both", expand=True, padx=Style.PADDING_MD, pady=Style.PADDING_SM)
@@ -92,6 +90,12 @@ class DesignerMode:
             text="📁 Boş Form Yükle", 
             command=self.load_blank_form
         ).pack(side="left", padx=(0, Style.PADDING_MD))  # Increased button spacing
+        
+        create_secondary_button(
+            btn_row1, 
+            text="📂 Klasör Yükle", 
+            command=self.load_blank_folder
+        ).pack(side="left", padx=(0, Style.PADDING_MD))
         
         create_secondary_button(
             btn_row1, 
@@ -385,6 +389,44 @@ class DesignerMode:
             
         self.current_page_index = 0
         self.display_current_page()
+
+    def load_blank_folder(self):
+        """Load images from a folder to create a multi-page template."""
+        folder_path = filedialog.askdirectory()
+        if not folder_path:
+            return
+            
+        print(f"[DESIGNER] Klasörden form yükleniyor: {folder_path}")
+        valid_exts = {'.jpg', '.jpeg', '.png', '.bmp'}
+        paths = []
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                if os.path.splitext(file)[1].lower() in valid_exts:
+                    paths.append(os.path.join(root, file))
+                    
+        paths.sort()  # Sort to keep page order consistent
+        
+        if not paths:
+            messagebox.showwarning("Uyarı", "Görsel bulunamadı.", parent=self.app.root)
+            return
+            
+        self.pages = []
+        for path in paths:
+            imgs = file_io.load_images_from_file(path)
+            for img in imgs:
+                self.pages.append({
+                    'image': img,
+                    'rois': [],
+                    'image_path': path
+                })
+                
+        if not self.pages:
+            messagebox.showerror("Hata", "Görseller okunurken hata oluştu.", parent=self.app.root)
+            return
+
+        self.current_page_index = 0
+        self.display_current_page()
+        print(f"[DESIGNER] Klasörden {len(self.pages)} sayfa yüklendi.")
 
     def load_template_for_editing(self):
         """Load existing template for editing. Logic unchanged."""

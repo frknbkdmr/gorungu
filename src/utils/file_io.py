@@ -56,9 +56,9 @@ def load_images_from_file(file_path):
         try:
             # img = cv2.imread(file_path)
             # Unicode safe read
-            stream = open(file_path, "rb")
-            bytes = bytearray(stream.read())
-            numpyarray = np.asarray(bytes, dtype=np.uint8)
+            with open(file_path, "rb") as stream:
+                bytes_data = bytearray(stream.read())
+            numpyarray = np.asarray(bytes_data, dtype=np.uint8)
             img = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
             
             if img is not None:

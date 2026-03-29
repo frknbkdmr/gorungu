@@ -576,7 +576,7 @@ class ScannerMode:
             self.progress_bar.set(1.0)
             self.app.root.update()
             
-            self.update_results_display(score, log)
+            self.update_results_display(score, subscales, log)
             self.update_total_score()
             self.refresh_canvas()
             
@@ -587,10 +587,29 @@ class ScannerMode:
             self.progress_bar.pack_forget()
             messagebox.showerror("Hata", str(e))
 
-    def update_results_display(self, score, log):
-        """Update the results text display. Logic unchanged."""
+    def update_results_display(self, score, subscales, log):
+        """Update the results text display with cumulative page scoring."""
         self.txt_results.delete("1.0", "end")
-        self.txt_results.insert("end", f"Puan: {score}\n\n")
+        
+        # GENEL TOPLAM
+        total_score = sum(r['total'] for r in self.session_results.values())
+        all_subscales = {}
+        for res in self.session_results.values():
+            for sub, val in res.get('subscales', {}).items():
+                all_subscales[sub] = all_subscales.get(sub, 0) + val
+                
+        self.txt_results.insert("end", "=== GENEL TOPLAM (Tüm Sayfalar) ===\n")
+        self.txt_results.insert("end", f"Toplam Puan: {total_score}\n")
+        for sub, val in all_subscales.items():
+            self.txt_results.insert("end", f" - {sub}: {val}\n")
+            
+        self.txt_results.insert("end", "\n=== BU SAYFA ===\n")
+        self.txt_results.insert("end", f"Sayfa Puanı: {score}\n")
+        if subscales:
+            for sub, val in subscales.items():
+                self.txt_results.insert("end", f" - {sub}: {val}\n")
+                
+        self.txt_results.insert("end", "\n=== DETAYLAR ===\n")
         for line in log:
             self.txt_results.insert("end", line + "\n")
         
@@ -768,16 +787,32 @@ class ScannerMode:
         res['subscales'] = p_subscales
         
         if input_idx == self.current_input_index:
-            self.update_results_display(p_score, p_log)
+            self.update_results_display(p_score, p_subscales, p_log)
             self.update_total_score()
 
     def show_session_report(self):
-        """Show session report dialog. Logic unchanged."""
+        """Show session report dialog with cumulative scoring."""
         if not self.session_results:
             return
         
         total_score = sum(r['total'] for r in self.session_results.values())
-        report = f"=== OTURUM RAPORU ===\nToplam Puan: {total_score}\n"
+        
+        report = "=== ÇOKLU SAYFA OTURUM RAPORU ===\n\n"
+        report += f"Genel Toplam Puan: {total_score}\n\n"
+        
+        report += "[Alt Ölçek Toplamları]\n"
+        all_subscales = {}
+        for res in self.session_results.values():
+            for sub, val in res.get('subscales', {}).items():
+                all_subscales[sub] = all_subscales.get(sub, 0) + val
+                
+        for sub, val in all_subscales.items():
+            report += f" - {sub}: {val}\n"
+            
+        report += "\n[Sayfa Dağılımı]\n"
+        for idx in sorted(self.session_results.keys()):
+            res = self.session_results[idx]
+            report += f" Sayfa {idx+1}: {res['total']} Puan\n"
         
         top = ctk.CTkToplevel(self.app.root)
         top.title("Rapor")

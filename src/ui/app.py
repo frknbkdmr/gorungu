@@ -175,8 +175,7 @@ class OMRApp:
         self.mode_instance = scanner.ScannerMode(self)
         self.mode_instance.setup_ui(self.main_frame)
         
-        # Unbind keys (Scanner doesn't use arrow keys for ROI moving)
-        self.root.unbind("<Key>")
+        # Key events are inherently routed to the active mode safely.
 
     def on_key_press(self, event):
         """Route key press to active mode if it handles it."""

@@ -26,7 +26,7 @@ class RegionPropertiesDialog(ctk.CTkToplevel):
         
         # Window setup
         window_width = 360
-        window_height = 320
+        window_height = 380
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
@@ -171,7 +171,7 @@ class GridDialog(ctk.CTkToplevel):
         
         # Window setup
         window_width = 360
-        window_height = 360
+        window_height = 430
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - window_width) // 2
@@ -489,9 +489,8 @@ class CornerCorrectionDialog(ctk.CTkToplevel):
         self.grab_set()
         
         # Toolbar
-        toolbar = ctk.CTkFrame(self, fg_color=colors["bg_secondary"], height=60, corner_radius=0)
+        toolbar = ctk.CTkFrame(self, fg_color=colors["bg_secondary"], corner_radius=0)
         toolbar.pack(side="top", fill="x")
-        toolbar.pack_propagate(False)
         
         toolbar_content = ctk.CTkFrame(toolbar, fg_color="transparent")
         toolbar_content.pack(fill="both", expand=True, padx=Style.PADDING_LG, pady=Style.PADDING_SM)

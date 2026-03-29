@@ -17,7 +17,7 @@ from PIL import Image, ImageTk
 
 from src.utils import file_io
 from src.ui import dialogs
-from src.ui.styles import Style, create_accent_button, create_secondary_button
+from src.ui.styles import Style, Tooltip, create_accent_button, create_secondary_button
 from src import config
 
 
@@ -52,6 +52,9 @@ class DesignerMode:
         self.pan_start_y = 0
         self.image_scale = 1.0
         
+        # Undo stack: {page_index: [snapshot, ...]}
+        self._undo_stacks = {}
+
         # Get colors from style system
         self.colors = Style.get_theme_colors()
 
@@ -86,29 +89,21 @@ class DesignerMode:
         btn_row1 = ctk.CTkFrame(grp_file, fg_color="transparent")
         btn_row1.pack(side="top", pady=(Style.PADDING_XS, 0))
         
-        create_secondary_button(
-            btn_row1, 
-            text="📁 Boş Form Yükle", 
-            command=self.load_blank_form
-        ).pack(side="left", padx=(0, Style.PADDING_MD))  # Increased button spacing
-        
-        create_secondary_button(
-            btn_row1, 
-            text="📂 Klasör Yükle", 
-            command=self.load_blank_folder
-        ).pack(side="left", padx=(0, Style.PADDING_MD))
-        
-        create_secondary_button(
-            btn_row1, 
-            text="📂 Şablon Yükle", 
-            command=self.load_template_for_editing
-        ).pack(side="left", padx=(0, Style.PADDING_MD))
-        
-        create_accent_button(
-            btn_row1, 
-            text="💾 Şablonu Kaydet", 
-            command=self.save_template
-        ).pack(side="left")
+        _b = create_secondary_button(btn_row1, text="📁 Boş Form Yükle", command=self.load_blank_form)
+        _b.pack(side="left", padx=(0, Style.PADDING_MD))
+        Tooltip(_b, "Tek görsel veya PDF yükleyin (JPG/PNG/PDF).")
+
+        _b = create_secondary_button(btn_row1, text="📂 Klasör Yükle", command=self.load_blank_folder)
+        _b.pack(side="left", padx=(0, Style.PADDING_MD))
+        Tooltip(_b, "Klasördeki tüm görsellerden çok sayfalı şablon oluşturun.")
+
+        _b = create_secondary_button(btn_row1, text="📂 Şablon Yükle", command=self.load_template_for_editing)
+        _b.pack(side="left", padx=(0, Style.PADDING_MD))
+        Tooltip(_b, "Var olan JSON şablonunu düzenlemek için açın.")
+
+        _b = create_accent_button(btn_row1, text="💾 Şablonu Kaydet", command=self.save_template)
+        _b.pack(side="left")
+        Tooltip(_b, "Şablonu JSON dosyası olarak kaydedin.  [Ctrl+S]")
         
         # Separator
         ctk.CTkFrame(
@@ -131,11 +126,9 @@ class DesignerMode:
         btn_row2 = ctk.CTkFrame(grp_edit, fg_color="transparent")
         btn_row2.pack(side="top", pady=(Style.PADDING_XS, 0))
         
-        create_secondary_button(
-            btn_row2, 
-            text="🗑️ Sayfayı Temizle", 
-            command=self.clear_rois
-        ).pack(side="left", padx=(0, Style.PADDING_MD))
+        _b = create_secondary_button(btn_row2, text="🗑️ Sayfayı Temizle", command=self.clear_rois)
+        _b.pack(side="left", padx=(0, Style.PADDING_MD))
+        Tooltip(_b, "Bu sayfadaki tüm ROI'leri sil.")
         
         self.grid_mode_switch = ctk.CTkSwitch(
             btn_row2,
@@ -149,7 +142,8 @@ class DesignerMode:
             button_hover_color=self.colors["text_primary"]
         )
         self.grid_mode_switch.pack(side="left")
-        
+        Tooltip(self.grid_mode_switch, "Grid Aracı: Seçilen alanı satır×sütun hücrelere böler.")
+
         self.auto_grid_switch = ctk.CTkSwitch(
             btn_row2,
             text="✨ Oto Grid",
@@ -160,6 +154,7 @@ class DesignerMode:
             progress_color=self.colors["success"]
         )
         self.auto_grid_switch.pack(side="left", padx=(Style.PADDING_MD, 0))
+        Tooltip(self.auto_grid_switch, "Oto Grid: Seçilen alanda piksel adaları (baloncuklar/kutucuklar) otomatik tespit edilir.")
         
         # Separator
         ctk.CTkFrame(
@@ -250,7 +245,8 @@ class DesignerMode:
             highlightthickness=0
         )
         self.canvas.pack(fill="both", expand=True)
-        
+        self.canvas.bind("<Configure>", lambda e: self._draw_empty_state() if not self.pages else None)
+
         # ==========================================================================
         # ROI PANEL (Right)
         # ==========================================================================
@@ -325,7 +321,7 @@ class DesignerMode:
             text_color=self.colors["text_secondary"]
         ).pack(anchor="w", padx=Style.PADDING_SM, pady=(Style.PADDING_SM, 0))
         
-        shortcuts_text = "↑↓←→: Hareket | Shift+: Hızlı\nAlt+: Boyut | Del: Sil | Sağ-tık: Geri"
+        shortcuts_text = "↑↓←→: Hareket  Shift+: Hızlı\nAlt+↓: Boyut  Del: Sil\nCtrl+Z: Geri Al  Sağ-tık: Geri"
         ctk.CTkLabel(
             info_frame,
             text=shortcuts_text,
@@ -538,9 +534,41 @@ class DesignerMode:
         self.refresh_roi_list()
         self.update_nav_buttons()
 
+    def _draw_empty_state(self):
+        """Draw instructional placeholder on empty canvas."""
+        self.canvas.delete("all")
+        try:
+            w = self.canvas.winfo_width() or 800
+            h = self.canvas.winfo_height() or 600
+        except Exception:
+            w, h = 800, 600
+        cx, cy = w // 2, h // 2
+        self.canvas.create_text(
+            cx, cy - 30,
+            text="📄",
+            font=("Segoe UI", 48),
+            fill=self.colors["text_muted"],
+            tags="empty_state"
+        )
+        self.canvas.create_text(
+            cx, cy + 40,
+            text="Başlamak için bir form veya şablon yükleyin",
+            font=Style.FONTS["body_bold"],
+            fill=self.colors["text_secondary"],
+            tags="empty_state"
+        )
+        self.canvas.create_text(
+            cx, cy + 68,
+            text="📁 Boş Form Yükle  |  📂 Şablon Yükle",
+            font=Style.FONTS["small"],
+            fill=self.colors["text_muted"],
+            tags="empty_state"
+        )
+
     def refresh_canvas(self):
         """Refresh canvas display. Logic unchanged."""
         if not self.pages:
+            self._draw_empty_state()
             return
         
         page = self.pages[self.current_page_index]

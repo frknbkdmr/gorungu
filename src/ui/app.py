@@ -9,7 +9,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 
 from src import config
-from src.ui import designer, scanner, dialogs
+from src.ui import designer, scanner, dialogs, study
 from src.ui.styles import Style
 
 
@@ -93,6 +93,7 @@ class OMRApp:
         self.menu_bar.add_cascade(label="Mod", menu=self.mode_menu)
         self.mode_menu.add_command(label="🎨 Tasarımcı Modu", command=self.switch_to_designer)
         self.mode_menu.add_command(label="📷 Tarayıcı Modu", command=self.switch_to_scanner)
+        self.mode_menu.add_command(label="📚 Çalışma Modu", command=self.switch_to_study)
         
         # View Menu
         self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
@@ -176,6 +177,17 @@ class OMRApp:
         self.mode_instance.setup_ui(self.main_frame)
         
         # Key events are inherently routed to the active mode safely.
+
+    def switch_to_study(self):
+        """Switch to Study Mode."""
+        self.current_mode = "STUDY"
+        self.clear_frame()
+        self.root.title("GÖRÜNGÜ - Çalışma Modu")
+        print("[APP] Mod değişti: ÇALIŞMA")
+        self.status_var.set("Çalışma Modu: Protokol ve hasta klasörü yükleyin.")
+
+        self.mode_instance = study.StudyMode(self)
+        self.mode_instance.setup_ui(self.main_frame)
 
     def on_key_press(self, event):
         """Route key press to active mode if it handles it."""

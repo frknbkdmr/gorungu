@@ -5,6 +5,7 @@ This module contains all UI-related constants (colors, fonts, dimensions)
 separated from functional logic to enable easy theming and consistency.
 """
 
+import tkinter as tk
 import customtkinter as ctk
 
 
@@ -225,6 +226,42 @@ def create_secondary_button(parent, text: str, command=None, **kwargs) -> ctk.CT
         corner_radius=Style.CORNER_RADIUS_MD,
         **kwargs
     )
+
+
+class Tooltip:
+    """Simple hover tooltip for any tkinter/CTk widget."""
+
+    def __init__(self, widget, text: str):
+        self.widget = widget
+        self.text = text
+        self._tip = None
+        widget.bind("<Enter>", self._show, add="+")
+        widget.bind("<Leave>", self._hide, add="+")
+
+    def _show(self, event=None):
+        if self._tip or not self.text:
+            return
+        x = self.widget.winfo_rootx() + self.widget.winfo_width() // 2
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 4
+        self._tip = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        colors = Style.get_theme_colors()
+        tk.Label(
+            tw, text=self.text,
+            background=colors["bg_tertiary"],
+            foreground=colors["text_primary"],
+            relief="flat",
+            font=Style.FONTS["small"],
+            padx=7, pady=4,
+            wraplength=320,
+            justify="left"
+        ).pack()
+
+    def _hide(self, event=None):
+        if self._tip:
+            self._tip.destroy()
+            self._tip = None
 
 
 def create_status_label(parent, text: str = "", status: str = "normal") -> ctk.CTkLabel:

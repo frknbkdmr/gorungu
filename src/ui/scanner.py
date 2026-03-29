@@ -17,7 +17,7 @@ from PIL import Image, ImageTk
 from src.utils import file_io
 from src.core import omr_engine
 from src.ui import dialogs
-from src.ui.styles import Style, create_section_header, create_accent_button, create_secondary_button
+from src.ui.styles import Style, Tooltip, create_section_header, create_accent_button, create_secondary_button
 from src import config
 
 
@@ -83,11 +83,12 @@ class ScannerMode:
         frm_setup.pack(fill="x", pady=(0, Style.PADDING_LG))
         
         self.btn_load_template = create_secondary_button(
-            frm_setup, 
-            text="📁 Şablon Yükle (JSON)", 
+            frm_setup,
+            text="📁 Şablon Yükle (JSON)",
             command=self.load_template
         )
         self.btn_load_template.pack(fill="x", pady=Style.PADDING_XS)
+        Tooltip(self.btn_load_template, "Tasarımcı Modu'nda oluşturulmuş JSON şablonunu yükleyin.")
         
         self.lbl_template = ctk.CTkLabel(
             frm_setup, 
@@ -154,17 +155,13 @@ class ScannerMode:
         )
         self.btn_scan_next.pack(side="left", padx=(Style.PADDING_SM, 0))
         
-        create_secondary_button(
-            frm_nav, 
-            text="✂️ Otomatik Kırp", 
-            command=self.auto_crop_current_page
-        ).pack(fill="x", pady=(Style.PADDING_SM, Style.PADDING_XS))
-        
-        create_secondary_button(
-            frm_nav, 
-            text="📐 Manuel Kırp/Düzelt", 
-            command=self.open_corner_correction
-        ).pack(fill="x", pady=Style.PADDING_XS)
+        _b = create_secondary_button(frm_nav, text="✂️ Otomatik Kırp", command=self.auto_crop_current_page)
+        _b.pack(fill="x", pady=(Style.PADDING_SM, Style.PADDING_XS))
+        Tooltip(_b, "Köşe tespiti ile formu otomatik kırpar ve düzeltir.")
+
+        _b = create_secondary_button(frm_nav, text="📐 Manuel Kırp/Düzelt", command=self.open_corner_correction)
+        _b.pack(fill="x", pady=Style.PADDING_XS)
+        Tooltip(_b, "Köşe noktalarını elle sürükleyerek perspektif düzeltmesi yapın.")
         
         # --- Section 3: Scoring ---
         self._create_section_header(panel_content, "3. İŞLEM")
@@ -239,12 +236,18 @@ class ScannerMode:
         self.progress_bar.set(0)
         # Will be shown during processing
         
-        create_accent_button(
-            frm_score, 
-            text="⚡ Sayfayı Puanla", 
-            command=self.score_current_page
-        ).pack(fill="x", pady=(0, Style.PADDING_SM))
-        
+        _b = create_accent_button(frm_score, text="⚡ Sayfayı Puanla", command=self.score_current_page)
+        _b.pack(fill="x", pady=(0, Style.PADDING_XS))
+        Tooltip(_b, "Mevcut sayfayı şablona hizala ve ROI'leri puanla.")
+
+        self.lbl_align_quality = ctk.CTkLabel(
+            frm_score, text="Hizalama: —",
+            font=Style.FONTS["small"],
+            text_color=self.colors["text_muted"],
+            anchor="w"
+        )
+        self.lbl_align_quality.pack(fill="x", pady=(0, Style.PADDING_SM))
+
         self.btn_edit_mode = ctk.CTkButton(
             frm_score,
             text="✎ Veri Düzenleme: Kapalı",
@@ -304,7 +307,8 @@ class ScannerMode:
             highlightthickness=0
         )
         self.canvas.pack(fill="both", expand=True)
-        
+        self.canvas.bind("<Configure>", lambda e: self._draw_empty_state() if not self.input_images else None)
+
         # ==========================================================================
         # RIGHT PANEL - Results
         # ==========================================================================
@@ -488,6 +492,24 @@ class ScannerMode:
             self.current_input_index += 1
             self.update_scanner_ui()
 
+    def _draw_empty_state(self):
+        """Draw instructional placeholder on empty canvas."""
+        self.canvas.delete("all")
+        try:
+            w = self.canvas.winfo_width() or 800
+            h = self.canvas.winfo_height() or 600
+        except Exception:
+            w, h = 800, 600
+        cx, cy = w // 2, h // 2
+        self.canvas.create_text(cx, cy - 30, text="📷", font=("Segoe UI", 48),
+                                fill=self.colors["text_muted"], tags="empty_state")
+        self.canvas.create_text(cx, cy + 40, text="Şablon ve taranmış formları yükleyin",
+                                font=Style.FONTS["body_bold"],
+                                fill=self.colors["text_secondary"], tags="empty_state")
+        self.canvas.create_text(cx, cy + 68, text="📁 Şablon Yükle  →  🖼️ Resimleri Yükle  →  ⚡ Puanla",
+                                font=Style.FONTS["small"],
+                                fill=self.colors["text_muted"], tags="empty_state")
+
     def refresh_canvas(self):
         """Refresh the canvas display. Logic unchanged."""
         if not self.input_images:
@@ -559,10 +581,24 @@ class ScannerMode:
             
             if aligned is None:
                 self.txt_results.insert("end", "Hizalama BAŞARISIZ.\n")
+                self.lbl_align_quality.configure(text="Hizalama: Başarısız ✗", text_color=self.colors["error"])
                 messagebox.showwarning("Hata", "Hizalama başarısız.")
                 self.progress_bar.pack_forget()
                 return
-            
+
+            # Alignment quality from homography determinant
+            if M is not None:
+                try:
+                    det = float(M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0])
+                    if 0.5 < abs(det) < 2.0:
+                        self.lbl_align_quality.configure(text="Hizalama: İyi ✓", text_color=self.colors["success"])
+                    else:
+                        self.lbl_align_quality.configure(text="Hizalama: Zayıf ⚠", text_color=self.colors["warning"])
+                except Exception:
+                    self.lbl_align_quality.configure(text="Hizalama: Belirsiz", text_color=self.colors["text_muted"])
+            else:
+                self.lbl_align_quality.configure(text="Hizalama: İyi ✓", text_color=self.colors["success"])
+
             self.progress_bar.set(0.8)
             self.app.root.update()
                 
@@ -579,6 +615,10 @@ class ScannerMode:
             self.update_results_display(score, subscales, log)
             self.update_total_score()
             self.refresh_canvas()
+            total_pages = len(self.input_images)
+            self.app.root.title(
+                f"GÖRÜNGÜ — Tarayıcı  ›  Sayfa {self.current_input_index + 1}/{total_pages}  ›  Puan: {score}"
+            )
             
             # Hide progress bar after completion
             self.progress_bar.pack_forget()
@@ -840,9 +880,23 @@ class ScannerMode:
         ).pack(pady=Style.PADDING_MD)
 
     def on_threshold_change(self, value):
-        """Handle threshold slider change. Logic unchanged."""
+        """Handle threshold slider change with live ROI preview."""
         self.dynamic_threshold = float(value)
         self.lbl_threshold_value.configure(text=f"{self.dynamic_threshold:.3f}")
+        # Debounced live preview
+        if hasattr(self, '_threshold_after_id'):
+            self.app.root.after_cancel(self._threshold_after_id)
+        self._threshold_after_id = self.app.root.after(40, self._apply_live_threshold)
+
+    def _apply_live_threshold(self):
+        """Re-classify ROIs at current threshold and redraw — no re-scoring."""
+        if self.current_input_index not in self.session_results:
+            return
+        details = self.session_results[self.current_input_index]["details"]
+        for item in details:
+            item["is_marked"] = item.get("fill_ratio", 0) >= self.dynamic_threshold
+        self.draw_scanner_rois(details)
+        self.recalculate_page_score(self.current_input_index)
 
     # ==========================================================================
     # Zoom/Pan Methods (Logic unchanged)
